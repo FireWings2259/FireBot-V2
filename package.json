@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/FireWings2259/FireBot-V2/issues"
   },
-  "homepage": "https://github.com/FireWings2259/FireBot-V2#readme"
+  "homepage": "https://github.com/FireWings2259/FireBot-V2#readme",
+  "dependencies": {
+    "discord.js": "^11.2.1"
+  }
 }

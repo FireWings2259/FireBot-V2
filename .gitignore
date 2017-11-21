@@ -1,3 +1,9 @@
+#Config
+config.json
+main.db
+
+
+
 # Logs
 logs
 *.log
