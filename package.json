@@ -1,0 +1,19 @@
+{
+  "name": "firebot-v2",
+  "version": "1.0.0",
+  "description": "My rebuild of FireBot",
+  "main": "bot.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/FireWings2259/FireBot-V2.git"
+  },
+  "author": "FireWings",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/FireWings2259/FireBot-V2/issues"
+  },
+  "homepage": "https://github.com/FireWings2259/FireBot-V2#readme"
+}
