@@ -1,6 +1,13 @@
-#Config
-config.json
-main.db
+#Dev Stuff
+lang/
+dev.config.json
+Database/settings.json
+Database/error.json
+
+#Test Stuff
+test.js
+Database/test.json
+test/
 
 # Logs
 logs
