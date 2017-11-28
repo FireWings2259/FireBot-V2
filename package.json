@@ -17,8 +17,10 @@
   },
   "homepage": "https://github.com/FireWings2259/FireBot-V2#readme",
   "dependencies": {
+    "bluebird": "^3.5.1",
     "discord.js": "^11.2.1",
-    "diskdb": "^0.1.17",
-    "human-date": "^1.4.0"
+    "human-date": "^1.4.0",
+    "sequelize": "^4.23.1",
+    "sqlite3": "^3.1.13"
   }
 }

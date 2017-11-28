@@ -2,6 +2,7 @@
 //By FireWings
 
 //Setup some constants / Varibles
+var Promise = require("bluebird"); //Useing the Bluebird Promise Library
 
 const fs = require('fs'); //Determine the Auth File to use
 var authSettings;
@@ -12,64 +13,55 @@ if (fs.existsSync("./dev.config.json")) {
   authSettings = require("./config.json"); //Load Bot Config
 }
 
-const EventHandler = {
-  message: require("./Events/Message.js")
-};
+//Load and apply the default language
+const LangSelector = require("./Language/LangSelector.js");
+const lang = new LangSelector(authSettings.default_lang);
 
-const hdate = require('human-date');
+//load the event handlers
+const EventHandler = {
+  message: require("./Events/Message.js"),
+  error: require("./Events/Error.js")
+};
 
 //Discord Stuff
 const Discord = require('discord.js');
 const client = new Discord.Client();
 
-//Database Vars
-var db = require('diskdb');
+//Database Stuff
+const Sequelize = require('sequelize');
+const sqlize = new Sequelize('database', 'user', 'password', {
+    host: 'localhost',
+    dialect: 'sqlite',
+    logging: false,
+    // SQLite only
+    storage: 'database.sqlite',
+});
+
+const botSet = "";
+
+const globalUsers = "";
+
+const guildSet = "";
+
+const guildAdmin =  "";
+
+
+
+
+
+/*//The old way of doing things... [NOTE] This will be removed completly... [/NOTE]
+/* var db = require('diskdb');
 db.connect('./Database', ['lang', 'settings', 'error', 'test']); //"Connect to the DB"
 //var lang = db.lang; //The normal language DB
 var lang = {au:{eng: require("./lang/au-eng.json")}}; //The local edit DB
 var settings = db.settings; //Each Guilds Settings
 var test = db.test; //Test DB
-var errordb = db.error; //DB of Errors
+var errordb = db.error; //DB of Errors */
 
-//Error Handle
-function msgErrHand(err, msg, errordb){
-  let time = hdate.prettyPrint(new Date, { showTime: true });
-  
-  let server;
-  if (msg.guild == null){
-    server = {id:"Na", name:"Na"};
-  } else {
-    server = {id: msg.guild.id, name: msg.guild.name};
-  }
-  
-  console.log(time);
-  console.log("Whoa Dude! Error!");
-  console.log(err);
-  
-  errordb.save({
-      Time: time,
-      User: {
-        ID: msg.author.id,
-        Username: msg.author.username
-      },
-      Channel: {
-        ID: msg.channel.id,
-        Name: msg.channel.name
-      },
-      Guild: {
-        ID: server.id,
-        Name: server.name
-      },
-      Err: err
-      /*Err: {
-        Type: err.name.toString(),
-        Err: err.message.toString()
-      }*/
-    });
-}
 
 //Do the Thing
 client.on('ready', () => {
+  
   console.log(`Logged in as ${client.user.tag}!`);
 });
 
@@ -95,13 +87,13 @@ client.on("guildMemberRemove", member => {
 });
 
 
-client.on('message', msg => {
+client.on('message', message => {
   
   try {
-    EventHandler.message(client, db, msg);
+    EventHandler.message(client, db, message);
   }
   catch(err){
-    msgErrHand(err, msg, errordb);
+   EventHandler.error.message(err, message, db, lang);
   }
 });
 

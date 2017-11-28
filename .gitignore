@@ -1,12 +1,12 @@
 #Dev Stuff
-lang/
 dev.config.json
-Database/settings.json
-Database/error.json
+lang/ja.js
+Database/database.sqlite
+
 
 #Test Stuff
 test.js
-Database/test.json
+Database/test.sqlite
 test/
 
 # Logs
