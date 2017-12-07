@@ -1,4 +1,4 @@
-module.exports = function(sqlize, DataTypes, authSettings){
+module.exports = (sqlize, DataTypes) => {
   return sqlize.define("guildSettings",{
     id: {
       type: DataTypes.STRING,
@@ -9,11 +9,11 @@ module.exports = function(sqlize, DataTypes, authSettings){
     name: DataTypes.STRING,
     prefix: {
       type: DataTypes.STRING,
-      defaultValue: authSettings.default_prefix
+      defaultValue: "-"  //authSettings.default_prefix
     },
     language: {
       type: DataTypes.JSON,
-      defaultValue: {lang: authSettings.default_lang[0], loc: authSettings.default_lang[1]}
+      defaultValue: {lang: "en", loc: "AU"} //{lang: authSettings.default_lang[0], loc: authSettings.default_lang[1]}
     },
     devMessage: {
       type: DataTypes.BOOLEAN,

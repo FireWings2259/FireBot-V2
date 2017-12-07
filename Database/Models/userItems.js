@@ -1,4 +1,4 @@
-module.exports = function(sqlize, DataTypes){
+module.exports = (sqlize, DataTypes) => {
   return sqlize.define("userItems", {
     id: DataTypes.STRING,
     item_id: DataTypes.STRING,

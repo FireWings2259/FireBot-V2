@@ -16,14 +16,14 @@ module.exports = {
     },
     database:{
       error:{
-          user_id: "No User ID",
-          user_name: "No User Name",
-          user_nick: "No User Nickname",
-          channel_id: "No Channel ID",
-          channel_name: "No Channel Name",
-          guild_id: "No Guild ID",
-          guild_name: "No Guild Name",
-          message: "No Message"
+          user_id: "No User ID", //00x000a01
+          user_name: "No User Name", //00x000a02
+          user_nick: "No User Nickname", //00x000a03
+          channel_id: "No Channel ID", //00x000a04
+          channel_name: "No Channel Name", //00x000a04
+          guild_id: "No Guild ID", //00x000a06
+          guild_name: "No Guild Name", //00x000a07
+          message: "No Message" //00x000a08
       }  
     },
     nope: function(obj) { //{ username: "The Useres Username" }

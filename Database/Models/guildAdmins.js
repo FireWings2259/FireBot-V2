@@ -1,5 +1,4 @@
-
-module.exports = function(sqlize, DataTypes){
+module.exports = (sqlize, DataTypes) => {
     return sqlize.define("guildAdmins", {
       guildID: {
         type: DataTypes.STRING,
