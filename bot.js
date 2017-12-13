@@ -1,28 +1,28 @@
 //FireBot v2
 //By FireWings
 
-//Setup some constants / Varibles
+//Setup some Constants / Varibles
 /* global __dirname */
 
 //Cross Platform Path Stuff
 var path = require("path");
 var jp = path.join;
-var cwd = __dirname;
+var cwd = __dirname; //Current Working Directory
 
 //Determine the Auth File to use
 var fs = require('fs'); 
-var authSettings;
+var configFile;
 if (fs.existsSync(jp(cwd, "dev.config.json"))) { 
   console.log("Detected a dev config, useing that!");
-  authSettings = require(jp(cwd, "dev.config.json")); //Load Dev Bot Config
+  configFile = require(jp(cwd, "dev.config.json")); //Load Dev Bot Config
 } else {
-  authSettings = require(jp(cwd, "config.json")); //Load Bot Config
+  configFile = require(jp(cwd, "config.json")); //Load Bot Config
 }
 
 //Create, Load and Apply the Default Language Settings
 const LangSelector = require(jp(cwd, "Language","LangSelector.js"));
-const lang = new LangSelector(authSettings.default_lang);
-const behl = lang.console.info.botEvents;
+const lang = new LangSelector(configFile.default_lang);
+const behl = lang.console.info.botEvents; //Bot Event Handler Language
 
 var Promise = require("bluebird"); //Useing the Bluebird Promise Library
 
@@ -44,15 +44,29 @@ var shopItems = db.shopItems;
 var userItems = db.userItems;
 var errorLog = db.errorLog;
 
+//This is the debug options...
+if (configFile.debug !== undefined){
+    if (configFile.debug.promiseCrash === true) { //Crash on failed Promise Thats not covered...
+        process.on('unhandledRejection', (err) => { 
+          console.error(err);
+          process.exit(1);
+        });
+    }
+}
+
 //Discord Stuff
 const Discord = require('discord.js');
 const client = new Discord.Client();
 
-async function getLang(msg){ //Language wrapper
-    let guildID = msg.guild.id;
-    let gLangS;
-    try{gLangS = await guildSet.findOne({ where: { id: guildID } });} //Get the 
-    catch(e){gLangS = lang;}; //Yes I know that theres an error, but its being ignored. (Might fix this later...)
+async function getLang(guild){ //Language wrapper
+    if (guild !== null){
+        let gLangS;
+        let guildID = guild.id;
+        try{gLangS = await guildSet.findOne({ where: { id: guildID } });} //Get the 
+        catch(e){gLangS = lang;}; //Yes I know that theres an error, but its being ignored. (Might fix this later...)
+    } else {
+        gLangS = lang;
+    }
     let gLang = new LangSelector(gLangS);
     return gLang;
 }
@@ -81,13 +95,13 @@ client.on("guildMemberRemove", async member => {
 
 
 client.on('message', async message => {
-  let cmLang = await getLang(message);
+  let cmLang = await getLang(message.guild);
   try {
-    EventHandler.message(client, db, message, cmLang);
+    EventHandler.message(client, db, message, cmLang, configFile);
   }
   catch(err){
    EventHandler.error.message(err, message, errorLog);
   }
 });
 
-client.login(authSettings.bot.token);
+client.login(configFile.bot.token);

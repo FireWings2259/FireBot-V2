@@ -6,8 +6,8 @@ var selfObjError = function(obj) { //The self error function.
 };
 
 module.exports = {
-    bot: {
-        
+    message: {
+        dm: "Sorry I can't work with DMs at the moment..."
     },
     console: {
         info:{

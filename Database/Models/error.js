@@ -11,7 +11,7 @@ code themself, for you to lookup.
 module.exports = (sqlize, DataTypes) => {
   return sqlize.define("errorLog", {
      time: {
-       type: DataTypes.DATE,
+       type: DataTypes.STRING,
        defaultValue: hdate.prettyPrint(new Date, { showTime: true })
      },
      error: DataTypes.STRING,

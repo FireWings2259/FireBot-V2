@@ -1,37 +1,32 @@
-const hdate = require('human-date');
+//Error Handler
 
 module.exports = {
-    message: function(err, msg, db, lang){
-      let time = hdate.prettyPrint(new Date, { showTime: true });
-      
-      let server;
-      if (msg.guild == null){
-        server = {id:"Na", name:"Na"};
-      } else {
-        server = {id: msg.guild.id, name: msg.guild.name};
-      }
-      
-      console.log(time);
-      console.log(lang.console.error.msg);
-      console.log(err);
-      
-      db.save({
-          Time: time,
-          User: {
-            ID: msg.author.id,
-            Username: msg.author.username
-          },
-          Channel: {
-            ID: msg.channel.id,
-            Name: msg.channel.name
-          },
-          Guild: {
-            ID: server.id,
-            Name: server.name
-          },
-          Message: msg.content,
-          Err: err
-        });
+    message: async function(err, msg, db){
+        try {
+            const error = await db.create(await new dbobj(err, msg));
+        } catch(e){
+            console.log(e);
+        }
     }
-    
 };
+
+async function dbobj(err, msg){
+    this.error = err;
+    if (msg !== null && msg !== undefined){
+       this.user_id = msg.author.id;
+       this.user_name = msg.author.username;
+       this.channel_id = msg.channel.id;
+       this.message = msg.content;
+       if (msg.channel.type === "text"){
+           this.guild_id = msg.guild.id;
+           this.guild_name = msg.guild.name;
+           this.channel_name = msg.channel.name;
+       }
+       if (msg.author.guild !== null){
+           let nick = await msg.author.guild.fetchMember(msg.author).nickname;
+           if (typeof(nick) === "string"){
+               this.user_nick = nick;
+           }
+       }
+    }
+}

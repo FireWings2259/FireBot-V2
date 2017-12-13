@@ -12,18 +12,19 @@ var jp = path.join;
 var cwd = __dirname;
 
 const fs = require('fs'); //Determine the Auth File to use
-var authSettings;
+var configFile;
 if (fs.existsSync(jp(cwd, "..", "dev.config.json"))) { 
-  authSettings = require(jp(cwd, "..", "dev.config.json")); //Load Dev Bot Config
+  configFile = require(jp(cwd, "..", "dev.config.json")); //Load Dev Bot Config
 } else {
-  authSettings = require(jp(cwd, "..", "config.json")); //Load Bot Config
+  configFile = require(jp(cwd, "..", "config.json")); //Load Bot Config
 }
 
 const sqlize = new Sequelize('database', 'username', 'password', {
     host: 'localhost',
     dialect: 'sqlite',
     logging: false,
-    storage: './database.sqlite'
+    storage: './Database/database.sqlite',
+    operatorsAliases: false
 });
 
 const botSet = sqlize.import(jp(cwd, "Models","botSettings.js"));
@@ -39,29 +40,41 @@ const errorLog = sqlize.import(jp(cwd, "Models","error.js"));
 userItems.belongsTo(globalUsers, {foreignKey: 'item_id', as: 'item' });
 
 //Look This might work, it might not, For now im gonna leave it untill I figureout a better way.
-function *updateDbDefaults(){
-    yield sqlize.queryInterface.changeColumn(
+async function updateDbDefaults(){
+    await checkFirstRun();
+    
+    await sqlize.queryInterface.changeColumn(
      'guildSettings',
      'prefix',
      {
        type: Sequelize.STRING,
-       defaultValue: authSettings.default_prefix
+       defaultValue: configFile.bot.default_prefix
     });
 
-    yield  sqlize.queryInterface.changeColumn(
+    await sqlize.queryInterface.changeColumn(
       'guildSettings',
       'language',
       {
         type: Sequelize.JSON,
-        defaultValue: {lang: authSettings.default_lang[0], loc: authSettings.default_lang[1]}
+        defaultValue: {lang: configFile.bot.default_lang[0], loc: configFile.bot.default_lang[1]}
     });
-
-    if (!fs.existsSync(jp(cwd,"database.sqlite"))){
-        console.log("DB Not Real! First Run!");
-        yield  sqlize.sync().then(console.log("DB Created!")).catch(console.error);
-    }
 }
+
+function checkFirstRun(){
+    return new Promise(function(resolve, reject){
+        if (!fs.existsSync(jp(cwd, "database.sqlite"))){
+        console.log("DB Not Real! First Run!");
+        sqlize.sync().then(function(){
+         console.log("DB Created!");
+         resolve();
+        }).catch(function(e){
+            reject(e);
+        });
+    }else{
+        console.log("Not First Run!");
+        resolve();
+    }});
+};
 
 updateDbDefaults();
 module.exports = {botSet, globalUsers, guildAdmins, lvlPBot, lvlPG, guildSet, shopItems, userItems, errorLog};
-
