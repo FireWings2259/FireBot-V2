@@ -10,8 +10,34 @@ module.exports = {
         
     },
     console: {
+        info:{
+            botEvents: {
+                ready: function(obj){ //{client: "The Bot/Client Object"}
+                    if (typeof(obj) !== "object") throw new Error(selfObjError(obj)); 
+                    return `Logged in as ${obj.client.user.tag}!`;
+                },
+                guildCreate: function(obj){ //{guild: "The Guild Object"}
+                    if (typeof(obj) !== "object") throw new Error(selfObjError(obj)); 
+                    return "Woo new server! Welcome" + obj.guild.name;
+                },
+                guildDelete: function(obj){ //{guild: "The Guild Object"}
+                    if (typeof(obj) !== "object") throw new Error(selfObjError(obj)); 
+                    return ":( We lost a server. Goodbye " + obj.guild.name;
+                },
+                guildMemberAdd: function(obj){ //{member: "The Member Object"}
+                    if (typeof(obj) !== "object") throw new Error(selfObjError(obj)); 
+                    return "So @" + obj.member.id + " (" + obj.member.username + ") "+" joined " + obj.member.guild.name;
+                },
+                guildMemberRemove: function(obj){ //{memeber: "The Guild Object", client: "The Bot/Client Object"}
+                    if (typeof(obj) !== "object") throw new Error(selfObjError(obj)); 
+                    let x = "So @" + obj.member.id; 
+                    if (obj.member.id === obj.client.user.id){x += " (Me!)";};
+                    x += " left " + obj.member.guild.name;
+                }
+            }
+        },
         error:{
-            msg: "Whoa Dude! Error!"
+            msg: "Whoa Dude! Error!" //00x000a00
         }
     },
     database:{
@@ -26,8 +52,8 @@ module.exports = {
           message: "No Message" //00x000a08
       }  
     },
-    nope: function(obj) { //{ username: "The Useres Username" }
-            if (typeof(obj) != "object") throw new Error(selfObjError(obj));  
+    nope: function(obj) { //{ username: "The Users Username" }
+            if (typeof(obj) !== "object") throw new Error(selfObjError(obj));  
             return "This is a nope from: " + obj.username + ". Thats a Full Stop!";
           }
 };

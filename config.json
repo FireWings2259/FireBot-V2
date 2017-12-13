@@ -1,8 +1,8 @@
 {
     "bot":{
-        token:"YOUR TOKEN HERE",
-        maintainer_id: "YOUR ID HERE",
-        default_lang: ["en", "AU"],
-        default_prefix: "!",
+        "token":"YOUR TOKEN HERE",
+        "maintainer_id": "YOUR ID HERE",
+        "default_lang": ["en", "AU"],
+        "default_prefix": "!"
     }
 }

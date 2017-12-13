@@ -3,12 +3,12 @@ module.exports = (sqlize, DataTypes) => {
         admin:{
             type: DataTypes.STRING,
             allowNull: false,
-            primaryKey: true,
+            primaryKey: true
         },
         level:{
            type: DataTypes.INTEGER,
 		    defaultValue: 0,
-		    allowNull: false,  
-        },
+		    allowNull: false 
+        }
     }, {timestamps: true});
 };

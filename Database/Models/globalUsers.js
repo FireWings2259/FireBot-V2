@@ -4,12 +4,12 @@ module.exports = (sqlize, DataTypes) => {
             type: DataTypes.STRING,
             unique: true,
             allowNull: false,
-            primaryKey: true,
+            primaryKey: true
         },
         balance: {
             type: DataTypes.INTEGER,
             defaultValue: 0,
-            allowNull: false,
-        },
+            allowNull: false
+        }
     }, {timestamps: true});
 };

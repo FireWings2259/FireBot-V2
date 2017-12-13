@@ -1,6 +1,6 @@
 //Message Handler
 
-module.exports = (bot, db, message) => {
+module.exports = (bot, db, message, lang) => {
     if (message.author.bot) return; //console.log(msg.author.username + " is a bot! Not Touching!");
     
     if (message.channel.type === 'dm'){ 

@@ -4,10 +4,10 @@ module.exports = (sqlize, DataTypes) => {
 		    type: DataTypes.INTEGER,
 		    defaultValue: 0,
 		    allowNull: false,
-		    primaryKey: true,
+		    primaryKey: true
       },
-    name:DataTypes.String,
+    name:DataTypes.STRING,
     desc:DataTypes.STRING,
-    colour:DataTypes.String,
+    colour:DataTypes.STRING
     });  
 };

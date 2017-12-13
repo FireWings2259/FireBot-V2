@@ -4,7 +4,7 @@ module.exports = (sqlize, DataTypes) => {
       type: DataTypes.STRING,
       unique: true,
       allowNull: false,
-      primaryKey: true,
+      primaryKey: true
     },
     name: DataTypes.STRING,
     prefix: {
@@ -24,12 +24,12 @@ module.exports = (sqlize, DataTypes) => {
       defaultValue: false
     },
     guildOwner: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING
     },
     Commands: {
       type: DataTypes.JSON,
       allowNull: false,
-      defaultValue: {}, //This is populated later
+      defaultValue: {} //This is populated later
     },
     
     other: {

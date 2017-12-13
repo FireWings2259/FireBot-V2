@@ -1,0 +1,18 @@
+This is a simple list of Error codes.
+(This is only here because I will forget them :p )
+
+Generic:
+    Generic  ==>  00x000a00
+
+DataBase:
+    No User ID        ==>  00x000a01
+    No User Name      ==>  00x000a02
+    No User Nickname  ==>  00x000a03
+    No Channel ID"    ==>  00x000a04
+    No Channel Name   ==>  00x000a04
+    No Guild ID       ==>  00x000a06
+    No Guild Name     ==>  00x000a07
+    No Message        ==>  00x000a08
+
+Language Driver:
+    File Error  ==>  00x001a00

@@ -3,12 +3,12 @@ module.exports = (sqlize, DataTypes) => {
       guildID: {
         type: DataTypes.STRING,
         allowNull: false,
-        primaryKey: true,
+        primaryKey: true
       },
       ID: {
         type: DataTypes.STRING,
         allowNull: false,
-        primaryKey: true,
+        primaryKey: true
       },
       isGroup:{
         type: DataTypes.BOOLEAN,
@@ -18,7 +18,7 @@ module.exports = (sqlize, DataTypes) => {
       level:{
 		    type: DataTypes.INTEGER,
 		    defaultValue: 0,
-		    allowNull: false,
+		    allowNull: false
       }
     }, {timestamps: true});
 };

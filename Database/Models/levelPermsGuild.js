@@ -3,16 +3,16 @@ module.exports = (sqlize, DataTypes) => {
     guildID:{
       	type: DataTypes.STRING,
 		    allowNull: false,
-		    primaryKey: true,
+		    primaryKey: true
     },
     id:{
 		    type: DataTypes.INTEGER,
 		    defaultValue: 0,
 		    allowNull: false,
-		    primaryKey: true,
+		    primaryKey: true
       },
-    name:DataTypes.String,
+    name:DataTypes.STRING,
     desc:DataTypes.STRING,
-    colour:DataTypes.String,
+    colour:DataTypes.STRING
     });  
 };

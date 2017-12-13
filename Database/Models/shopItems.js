@@ -2,12 +2,12 @@ module.exports = (sqlize, DataTypes) => {
     return sqlize.define("shopItems",{
         name: {
             type: DataTypes.STRING,
-            unique: true,
+            unique: true
         },
         cost: {
             type: DataTypes.INTEGER,
-            allowNull: false,
-        },
+            allowNull: false
+        }
     }, 
     {
       timestamps: false
