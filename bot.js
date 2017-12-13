@@ -73,11 +73,13 @@ async function getLang(guild){ //Language wrapper
 
 //Do the Thing
 client.on('ready', async () => {
+    await db.updateDbDefaults();
   console.log(behl.ready({client:client}));
 });
 
 client.on("guildCreate", async guild => {
     console.log(behl.guildCreate({guild:guild})); //Not needed
+    
 });
 
 client.on("guildDelete", async guild => {
@@ -95,13 +97,9 @@ client.on("guildMemberRemove", async member => {
 
 
 client.on('message', async message => {
-  let cmLang = await getLang(message.guild);
-  try {
-    EventHandler.message(client, db, message, cmLang, configFile);
-  }
-  catch(err){
-   EventHandler.error.message(err, message, errorLog);
-  }
-});
+  let cmLang = await getLang(message.guild).catch(e => console.error(e));
+    EventHandler.message(client, db, message, cmLang, configFile)
+        .catch(err => EventHandler.error.message(err, message, errorLog));
+  });
 
 client.login(configFile.bot.token);

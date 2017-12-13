@@ -1,5 +1,3 @@
-const hdate = require("human-date");
-
 /*So error codes are built like so..
 00x0000a000
 00x--_-, The first two Integers are the code type, 00 is for errors, 01 may be for notices, ect
@@ -10,10 +8,10 @@ code themself, for you to lookup.
 
 module.exports = (sqlize, DataTypes) => {
   return sqlize.define("errorLog", {
-     time: {
+    /* time: { //Don't need this becuse of the inbuilt time.
        type: DataTypes.STRING,
-       defaultValue: hdate.prettyPrint(new Date, { showTime: true })
-     },
+       defaultValue: "00x000a09"
+     },*/
      error: DataTypes.STRING,
      user_id: {
          type: DataTypes.STRING,
@@ -23,13 +21,17 @@ module.exports = (sqlize, DataTypes) => {
          type: DataTypes.STRING,
          defaultValue: "00x000a02"
      },
-     user_nick: {
+    /* user_nick: { //When this is figured out it will be put back in.
          type: DataTypes.STRING,
          defaultValue: "00x000a03"
-     },
+     }, */
      channel_id: {
          type: DataTypes.STRING,
          defaultValue: "00x000a04"
+     },
+     channel_type:{
+       type: DataTypes.STRING,
+       defaultValue:"00x000a10"
      },
      channel_name: {
          type: DataTypes.STRING,

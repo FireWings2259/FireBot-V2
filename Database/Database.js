@@ -76,5 +76,5 @@ function checkFirstRun(){
     }});
 };
 
-updateDbDefaults();
-module.exports = {botSet, globalUsers, guildAdmins, lvlPBot, lvlPG, guildSet, shopItems, userItems, errorLog};
+
+module.exports = {botSet, globalUsers, guildAdmins, lvlPBot, lvlPG, guildSet, shopItems, userItems, errorLog, updateDbDefaults};

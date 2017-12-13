@@ -49,7 +49,9 @@ module.exports = {
           channel_name: "No Channel Name", //00x000a04
           guild_id: "No Guild ID", //00x000a06
           guild_name: "No Guild Name", //00x000a07
-          message: "No Message" //00x000a08
+          message: "No Message", //00x000a08
+          time: "No Time", //00x000a09
+          channel_type: "No Channel Type" //00x000a10
       }  
     },
     nope: function(obj) { //{ username: "The Users Username" }

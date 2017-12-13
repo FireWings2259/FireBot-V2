@@ -13,6 +13,8 @@ DataBase:
     No Guild ID       ==>  00x000a06
     No Guild Name     ==>  00x000a07
     No Message        ==>  00x000a08
+    No Time           ==>  00x000a09
+    No Channel Type   ==>  00x000a10
 
 Language Driver:
     File Error  ==>  00x001a00
