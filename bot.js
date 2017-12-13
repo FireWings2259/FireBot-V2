@@ -1,17 +1,16 @@
-/* global __dirname */
-
 //FireBot v2
 //By FireWings
 
 //Setup some constants / Varibles
+/* global __dirname */
+
 //Cross Platform Path Stuff
 var path = require("path");
 var jp = path.join;
 var cwd = __dirname;
 
-var Promise = require("bluebird"); //Useing the Bluebird Promise Library
-
-const fs = require('fs'); //Determine the Auth File to use
+//Determine the Auth File to use
+var fs = require('fs'); 
 var authSettings;
 if (fs.existsSync(jp(cwd, "dev.config.json"))) { 
   console.log("Detected a dev config, useing that!");
@@ -25,15 +24,13 @@ const LangSelector = require(jp(cwd, "Language","LangSelector.js"));
 const lang = new LangSelector(authSettings.default_lang);
 const behl = lang.console.info.botEvents;
 
+var Promise = require("bluebird"); //Useing the Bluebird Promise Library
+
 //Load the Event Handlers
 const EventHandler = {
   message: require(jp(cwd,"Events","Message.js")),
   error: require(jp(cwd,"Events","Error.js"))
 };
-
-//Discord Stuff
-const Discord = require('discord.js');
-const client = new Discord.Client();
 
 //Database Stuff
 var db = require(jp(cwd, "Database","Database.js"));
@@ -46,6 +43,10 @@ var guildSet = db.guildSet;
 var shopItems = db.shopItems;
 var userItems = db.userItems;
 var errorLog = db.errorLog;
+
+//Discord Stuff
+const Discord = require('discord.js');
+const client = new Discord.Client();
 
 async function getLang(msg){ //Language wrapper
     let guildID = msg.guild.id;
@@ -63,7 +64,6 @@ client.on('ready', async () => {
 
 client.on("guildCreate", async guild => {
     console.log(behl.guildCreate({guild:guild})); //Not needed
-    
 });
 
 client.on("guildDelete", async guild => {
