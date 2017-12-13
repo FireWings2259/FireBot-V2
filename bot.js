@@ -18,6 +18,10 @@ if (fs.existsSync(jp(cwd, "dev.config.json"))) {
 } else {
   configFile = require(jp(cwd, "config.json")); //Load Bot Config
 }
+//Now that the config file is loaded, We add some settings...
+configFile.afterConfigIsLoaded = {
+  name:"FireBot-V2"  
+};
 
 //Create, Load and Apply the Default Language Settings
 const LangSelector = require(jp(cwd, "Language","LangSelector.js"));
@@ -29,11 +33,17 @@ var Promise = require("bluebird"); //Useing the Bluebird Promise Library
 //Load the Event Handlers
 const EventHandler = {
   message: require(jp(cwd,"Events","Message.js")),
+  guildCreate: require(jp(cwd,"Events","guildCreate.js")),
   error: require(jp(cwd,"Events","Error.js"))
 };
 
 //Database Stuff
 var db = require(jp(cwd, "Database","Database.js"));
+var { botSet, globalUsers, guildAdmins, lvlPBot, lvlPG,
+       guildSet, shopItems, userItems, errorLog, 
+       updateDbDefaults } = db;
+
+/* I don't think this is needed... [NOTE] This will be deleted at some point... [/NOTE]
 var botSet = db.botSet;
 var globalUsers = db.globalUsers;
 var guildAdmins = db.guildAdmins;
@@ -43,6 +53,7 @@ var guildSet = db.guildSet;
 var shopItems = db.shopItems;
 var userItems = db.userItems;
 var errorLog = db.errorLog;
+*/
 
 //This is the debug options...
 if (configFile.debug !== undefined){
@@ -78,8 +89,10 @@ client.on('ready', async () => {
 });
 
 client.on("guildCreate", async guild => {
+    if (!guild.available) return EventHandler.error.guildCreate(new Error("Guild Not Avaible"), guild, errorLog).catch(err => console.error(err));
     console.log(behl.guildCreate({guild:guild})); //Not needed
-    
+    EventHandler.guildCreate(client, db, guild, lang, configFile)
+    .catch(err => EventHandler.error.guildCreate(err, guild, errorLog));
 });
 
 client.on("guildDelete", async guild => {
@@ -97,7 +110,7 @@ client.on("guildMemberRemove", async member => {
 
 
 client.on('message', async message => {
-  let cmLang = await getLang(message.guild).catch(e => console.error(e));
+  let cmLang = await getLang(message.guild).catch(err => console.error(err));
     EventHandler.message(client, db, message, cmLang, configFile)
         .catch(err => EventHandler.error.message(err, message, errorLog));
   });

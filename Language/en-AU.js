@@ -9,6 +9,16 @@ module.exports = {
     message: {
         dm: "Sorry I can't work with DMs at the moment..."
     },
+    guildCreate:{
+      welcome:  function(obj){ //{guild: "The Guild Object" client:"The Bot/Client Object", bInfo:"The bot info set in the config file"}
+                    if (typeof(obj) !== "object") throw new Error(selfObjError(obj));
+                    let {guild, client, bInof} = obj;
+                    let x;
+                    x = "Hi " + guild.name + "!\nThanks for adding " + client.name + " to your server!";
+                    x+= "\nYou will need to setup you server ";
+                    return x;
+                }
+    },
     console: {
         info:{
             botEvents: {
