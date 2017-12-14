@@ -1,8 +1,7 @@
-/* global __dirname */
-
 //FireBot V2
 //Database Management
 
+/* global __dirname */
 const Promise = require("bluebird"); //Useing the Bluebird Promise Library
 const Sequelize = require('sequelize');
 
@@ -18,6 +17,10 @@ if (fs.existsSync(jp(cwd, "..", "dev.config.json"))) {
 } else {
   configFile = require(jp(cwd, "..", "config.json")); //Load Bot Config
 }
+
+//Load the Language File
+const LangSelector = require(jp(cwd, "..", "Language","LangSelector.js"));
+const lang = new LangSelector(configFile.default_lang);
 
 const sqlize = new Sequelize('database', 'username', 'password', {
     host: 'localhost',
@@ -58,7 +61,17 @@ async function updateDbDefaults(){
         type: Sequelize.JSON,
         defaultValue: {lang: configFile.bot.default_lang[0], loc: configFile.bot.default_lang[1]}
     });
+    
+    await sqlize.queryInterface.changeColumn(
+      'guildSettings',
+      'commands',
+      {
+        type: Sequelize.JSON,
+        defaultValue: lang.commands
+    });
 }
+
+//defaultValue: JSON.parse((JSON.stringify(lang.commands)))
 
 function checkFirstRun(){
     return new Promise(function(resolve, reject){

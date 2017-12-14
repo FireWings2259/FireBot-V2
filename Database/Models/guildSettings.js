@@ -26,10 +26,14 @@ module.exports = (sqlize, DataTypes) => {
     guildOwner: {
       type: DataTypes.STRING
     },
-    Commands: {
+    commands: {
       type: DataTypes.JSON,
       allowNull: false,
       defaultValue: {} //This is populated later
+    },
+    newServer:{
+      type: DataTypes.BOOLEAN,
+      defaultValue: true
     },
     
     other: {

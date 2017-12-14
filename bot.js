@@ -19,14 +19,16 @@ if (fs.existsSync(jp(cwd, "dev.config.json"))) {
   configFile = require(jp(cwd, "config.json")); //Load Bot Config
 }
 //Now that the config file is loaded, We add some settings...
+/* Might not want this...
 configFile.afterConfigIsLoaded = {
   name:"FireBot-V2"  
 };
+*/
 
 //Create, Load and Apply the Default Language Settings
 const LangSelector = require(jp(cwd, "Language","LangSelector.js"));
 const lang = new LangSelector(configFile.default_lang);
-const behl = lang.console.info.botEvents; //Bot Event Handler Language
+const behl = lang.console.info.botEvents; //Bot Event Handler Language file
 
 var Promise = require("bluebird"); //Useing the Bluebird Promise Library
 
@@ -70,11 +72,16 @@ const Discord = require('discord.js');
 const client = new Discord.Client();
 
 async function getLang(guild){ //Language wrapper
+    let gLangS;
     if (guild !== null){
-        let gLangS;
         let guildID = guild.id;
-        try{gLangS = await guildSet.findOne({ where: { id: guildID } });} //Get the 
-        catch(e){gLangS = lang;}; //Yes I know that theres an error, but its being ignored. (Might fix this later...)
+        try {
+            gLangS = await guildSet.findOne({ where: { id: guildID } }).get("language");
+        }
+        catch(e){
+            console.worn(e)
+            gLangS = lang;
+        }; //Yes I know that theres an error, but its being ignored. (Might fix this later...)
     } else {
         gLangS = lang;
     }

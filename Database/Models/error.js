@@ -21,10 +21,10 @@ module.exports = (sqlize, DataTypes) => {
          type: DataTypes.STRING,
          defaultValue: "00x000a02"
      },
-    /* user_nick: { //When this is figured out it will be put back in.
+    user_nick: {
          type: DataTypes.STRING,
          defaultValue: "00x000a03"
-     }, */
+     }, 
      channel_id: {
          type: DataTypes.STRING,
          defaultValue: "00x000a04"

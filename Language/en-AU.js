@@ -10,14 +10,23 @@ module.exports = {
         dm: "Sorry I can't work with DMs at the moment..."
     },
     guildCreate:{
-      welcome:  function(obj){ //{guild: "The Guild Object" client:"The Bot/Client Object", bInfo:"The bot info set in the config file"}
+      welcome:  function(obj){ //{guild: "The Guild Object" client:"The Bot/Client Object", gSet:"The Guild Settings DB Object"}
                     if (typeof(obj) !== "object") throw new Error(selfObjError(obj));
-                    let {guild, client, bInof} = obj;
+                    let {guild, client, gSet} = obj;
                     let x;
-                    x = "Hi " + guild.name + "!\nThanks for adding " + client.name + " to your server!";
-                    x+= "\nYou will need to setup you server ";
+                    x = "Hi " + guild.name + "!\nThanks for adding <@" + client.user.id + "> to your server!";
+                    x+= "\nYou will need to setup your server by running the command: '" + gSet.get("prefix") + gSet.get("commands").setup + "'";
+                    x+= "\nRemember only members that have the permissions of 'Administrator', 'Manage Server' or has both 'Manage Channels' and 'Manage Roles'";
+                    x+= "can setup the bot. During setup you will have the option to allow other members/groups.";
+                    x+= "For more help on setting up your server, run the command: '" + gSet.get("prefix") + gSet.get("commands").help + " " + gSet.get("commands").setup + "'";
                     return x;
                 }
+    },
+    commands:{
+        base:{
+            help:"help",
+            stop:"stop"
+        }
     },
     console: {
         info:{
@@ -28,7 +37,7 @@ module.exports = {
                 },
                 guildCreate: function(obj){ //{guild: "The Guild Object"}
                     if (typeof(obj) !== "object") throw new Error(selfObjError(obj)); 
-                    return "Woo new server! Welcome" + obj.guild.name;
+                    return "Woo new server! Welcome " + obj.guild.name;
                 },
                 guildDelete: function(obj){ //{guild: "The Guild Object"}
                     if (typeof(obj) !== "object") throw new Error(selfObjError(obj)); 
@@ -38,11 +47,12 @@ module.exports = {
                     if (typeof(obj) !== "object") throw new Error(selfObjError(obj)); 
                     return "So @" + obj.member.id + " (" + obj.member.username + ") "+" joined " + obj.member.guild.name;
                 },
-                guildMemberRemove: function(obj){ //{memeber: "The Guild Object", client: "The Bot/Client Object"}
+                guildMemberRemove: function(obj){ //{member: "The Guild Object", client: "The Bot/Client Object"}
                     if (typeof(obj) !== "object") throw new Error(selfObjError(obj)); 
-                    let x = "So @" + obj.member.id; 
+                    let x = "So " + obj.member.user.tag + " (@" + obj.member.id + ")"; 
                     if (obj.member.id === obj.client.user.id){x += " (Me!)";};
                     x += " left " + obj.member.guild.name;
+                    return x;
                 }
             }
         },
