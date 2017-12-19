@@ -1,26 +1,40 @@
+//FireBot-V2
 //Error Handler
-//const hdate = require("human-date");
 
 module.exports = {
-    message: async function(err, msg, db){
+    general: async function(err, db){
+      try{
+          let x = new dbobj(err, "general");
+          console.log("NiNiNi", err);
+          const error = await db.create(x)
+                  .catch(console.log);
+      }catch(e){
+          console.log(e);
+      }  
+    },
+    message: async function(err, db, msg){
         try {
             let x = new dbobj(err, msg);
-            if (msg.author.guild !== null){ //If this can be figured out sure.
-                let nick = await msg.author.guild.fetchMember(msg.author).nickname;
+            if (msg.guild !== null){ //If this can be figured out sure.
+                let nick = await msg.guild.fetchMember(msg.author.id).nickname;
                 if (typeof(nick) === "string"){
                     x.user_nick = nick;
                 }
             }
-            const error = await db.create(x);
+            console.log("NaNaNa", err);
+            const error = await db.create(x)
+                    .catch(console.log);
             
         } catch(e){
             console.log(e);
         }
     },
-    guildCreate: async function(err, guild, db){
+    guildCreate: async function(err, db, guild){
         try {
             let x = new dbobj(err, "guildCreate", guild);
-            const error = await db.create(x);
+            console.log("NeNeNe", err);
+            const error = await db.create(x)
+                    .catch(console.log);
         } catch(e) {
             console.log(e);
         }
@@ -31,7 +45,9 @@ module.exports = {
     //this.time = hdate.prettyPrint(new Date, { showTime: true, allUnits:true }); //Not Needed...
     this.error = err.toString();
     
-    if (type === "message") {
+    if(type === "general"){
+        //Noop
+    }else if (type === "message") {
         let msg = object;
         if (msg !== null && msg !== undefined){
            this.user_id = msg.author.id;

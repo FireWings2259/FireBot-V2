@@ -8,11 +8,12 @@ const getDefaultChannel = async (guild) => {
   if(guild.channels.exists("name", "general"))
     return guild.channels.find("name", "general");
   
-  let channel = guild.channels
+ // let channel = guild.channels
+    return guild.channels
           .filter(c => c.type === "text" && c.permissionsFor(guild.client.user).has("SEND_MESSAGES"))
           .sort((a, b) => a.position - b.position).first();
   
-  return channel;
+ // return channel;
 };
 
 
@@ -41,7 +42,7 @@ module.exports = async (client, db, guild, lang, configFile) => {
     gSet: guildData
   };
   
-  const channel = getDefaultChannel(guild);
-  client.sendMessage(channel.id, gcLang.welcome(x));
+  const channel = await getDefaultChannel(guild);
+  channel.send(gcLang.welcome(x));
 };
 

@@ -1,6 +1,9 @@
 //Australian English File
 //FireBot V2
 
+//NOTE: When translating please translate everything ABOVE the *console* property as thats more important.
+//Thanks
+
 var selfObjError = function(obj) { //The self error function.
     return String("Data Not Object! It's a '" + typeof(obj) + "'.");
 };
@@ -15,15 +18,16 @@ module.exports = {
                     let {guild, client, gSet} = obj;
                     let x;
                     x = "Hi " + guild.name + "!\nThanks for adding <@" + client.user.id + "> to your server!";
-                    x+= "\nYou will need to setup your server by running the command: '" + gSet.get("prefix") + gSet.get("commands").setup + "'";
+                    x+= "\nYou will need to setup your server by running the command: '" + gSet.get("prefix") + gSet.get("commands").base.setup + "'";
                     x+= "\nRemember only members that have the permissions of 'Administrator', 'Manage Server' or has both 'Manage Channels' and 'Manage Roles'";
-                    x+= "can setup the bot. During setup you will have the option to allow other members/groups.";
-                    x+= "For more help on setting up your server, run the command: '" + gSet.get("prefix") + gSet.get("commands").help + " " + gSet.get("commands").setup + "'";
+                    x+= " can setup the bot. During setup you will have the option to allow other members/groups.";
+                    x+= "\nFor more help on setting up your server, run the command: '" + gSet.get("prefix") + gSet.get("commands").base.help + " " + gSet.get("commands").base.setup + "'";
                     return x;
                 }
     },
     commands:{
         base:{
+            setup:"setup",
             help:"help",
             stop:"stop"
         }
@@ -54,10 +58,13 @@ module.exports = {
                     x += " left " + obj.member.guild.name;
                     return x;
                 }
-            }
+            },    
         },
         error:{
-            msg: "Whoa Dude! Error!" //00x000a00
+            msg: "Whoa Dude! Error!", //00x000a00
+            db: {
+                firstrun: "Something broke... "
+            }
         }
     },
     database:{

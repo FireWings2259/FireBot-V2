@@ -1,4 +1,4 @@
-module.exports = (sqlize, DataTypes) => {
+module.exports = (sqlize, DataTypes, lang, configFile) => {
   return sqlize.define("guildSettings",{
     id: {
       type: DataTypes.STRING,
@@ -9,11 +9,11 @@ module.exports = (sqlize, DataTypes) => {
     name: DataTypes.STRING,
     prefix: {
       type: DataTypes.STRING,
-      defaultValue: "-"  //authSettings.default_prefix
+      defaultValue: configFile.bot.default_prefix //"-"
     },
     language: {
       type: DataTypes.JSON,
-      defaultValue: {lang: "en", loc: "AU"} //{lang: authSettings.default_lang[0], loc: authSettings.default_lang[1]}
+      defaultValue: {lang: configFile.bot.default_lang[0], loc: configFile.bot.default_lang[1]} //{lang: "en", loc: "AU"}
     },
     devMessage: {
       type: DataTypes.BOOLEAN,
@@ -29,7 +29,7 @@ module.exports = (sqlize, DataTypes) => {
     commands: {
       type: DataTypes.JSON,
       allowNull: false,
-      defaultValue: {} //This is populated later
+      defaultValue: lang.commands //{} //This is populated later
     },
     newServer:{
       type: DataTypes.BOOLEAN,
