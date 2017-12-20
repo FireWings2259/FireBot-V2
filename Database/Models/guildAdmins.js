@@ -1,11 +1,11 @@
 module.exports = (sqlize, DataTypes) => {
     return sqlize.define("guildAdmins", {
-      guildID: {
+      guild_id: {
         type: DataTypes.STRING,
         allowNull: false,
         primaryKey: true
       },
-      ID: {
+      user_ID: {
         type: DataTypes.STRING,
         allowNull: false,
         primaryKey: true

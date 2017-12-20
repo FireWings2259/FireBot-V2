@@ -3,6 +3,7 @@
         "token":"YOUR TOKEN HERE",
         "maintainer_id": "YOUR ID HERE",
         "default_lang": ["en", "AU"],
-        "default_prefix": "!"
+        "default_prefix": "!",
+        "delete_lost_guild": true
     }
 }

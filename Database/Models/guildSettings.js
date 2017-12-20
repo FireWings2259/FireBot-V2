@@ -1,6 +1,6 @@
 module.exports = (sqlize, DataTypes, lang, configFile) => {
   return sqlize.define("guildSettings",{
-    id: {
+    guild_id: {
       type: DataTypes.STRING,
       unique: true,
       allowNull: false,
@@ -13,7 +13,7 @@ module.exports = (sqlize, DataTypes, lang, configFile) => {
     },
     language: {
       type: DataTypes.JSON,
-      defaultValue: {lang: configFile.bot.default_lang[0], loc: configFile.bot.default_lang[1]} //{lang: "en", loc: "AU"}
+      defaultValue: {lang: configFile.bot.default_lang[0], loc: configFile.bot.default_lang[1]}
     },
     devMessage: {
       type: DataTypes.BOOLEAN,
@@ -29,7 +29,7 @@ module.exports = (sqlize, DataTypes, lang, configFile) => {
     commands: {
       type: DataTypes.JSON,
       allowNull: false,
-      defaultValue: lang.commands //{} //This is populated later
+      defaultValue: lang.commands
     },
     newServer:{
       type: DataTypes.BOOLEAN,

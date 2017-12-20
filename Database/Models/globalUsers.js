@@ -1,6 +1,7 @@
 module.exports = (sqlize, DataTypes) => {
     return sqlize.define("globalUsers", {
-        id:{
+        user_id:{
+            
             type: DataTypes.STRING,
             unique: true,
             allowNull: false,

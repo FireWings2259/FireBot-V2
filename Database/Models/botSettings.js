@@ -1,6 +1,6 @@
 module.exports = (sqlize, DataTypes) => {
     return sqlize.define("botSettings",{
-        admin:{
+        admin_id:{
             type: DataTypes.STRING,
             allowNull: false,
             primaryKey: true

@@ -31,6 +31,7 @@ if (configFile.debug !== undefined){
     configFile.debug = {
         consoleAlerts: false,
         catchErrorToConsole: false,
+        dropDbOnStart: false,
         promiseCrash: false
     };
 }

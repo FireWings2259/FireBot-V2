@@ -29,9 +29,9 @@ module.exports = {
             console.log(e);
         }
     },
-    guildCreate: async function(err, db, guild){
+    guildCreateDelete: async function(err, db, guild){
         try {
-            let x = new dbobj(err, "guildCreate", guild);
+            let x = new dbobj(err, "guildCreateDelete", guild);
             console.log("NeNeNe", err);
             const error = await db.create(x)
                     .catch(console.log);
@@ -61,10 +61,10 @@ module.exports = {
                this.channel_name = msg.channel.name;
            }
         }
-    } else if (type === "guildCreate"){
+    } else if (type === "guildCreateDelete"){
         let guild = object;
         this.guild_id = guild.id;
         this.guild_name = guild.name;
         
     }
-}
+};

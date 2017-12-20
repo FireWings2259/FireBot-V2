@@ -12,13 +12,6 @@ var cwd = __dirname; //Current Working Directory
 const configFile = require(jp(cwd, "configMan.js")).configFile;
 const debug = configFile.debug;
 
-//Now that the config file is loaded, We add some settings...
-/* Might not want this...
-configFile.afterConfigIsLoaded = {
-  name:"FireBot-V2"  
-};
-*/
-
 //Create, Load and Apply the Default Language Settings (From this point on the language file will be used)
 const LangSelector = require(jp(cwd, "Language","LangSelector.js"));
 const lang = new LangSelector(configFile.default_lang);
@@ -30,6 +23,7 @@ const Promise = require("bluebird"); //Useing the Bluebird Promise Library (late
 const EventHandler = {
   message: require(jp(cwd,"Events","Message.js")),
   guildCreate: require(jp(cwd,"Events","guildCreate.js")),
+  guildDelete: require(jp(cwd,"Events","guildDelete.js")),
   error: require(jp(cwd,"Events","Error.js"))
 };
 
@@ -43,15 +37,20 @@ var { botSet, globalUsers, guildAdmins, lvlPBot, lvlPG,
 const Discord = require('discord.js');
 const client = new Discord.Client();
 
+client.FireBotVars = {}
+client.FireBotVars.lang = lang;
+client.FireBotVars.configFile = configFile;
+//client.FireBotVars.EventHandlers = EventHandler; //Don't Know about this...
+
 async function getLang(guild){ //Language wrapper
     let gLangS;
     if (guild !== null){
         let guildID = guild.id;
         try {
-            gLangS = await guildSet.findOne({ where: { id: guildID } }).get("language");
+            gLangS = await guildSet.findOne({ where: { guild_id: guildID } }).get("language");
         }
         catch(e){
-            if (debug.catchErrorToConsole) console.worn(e)
+            if (debug.catchErrorToConsole) console.log(e)
             gLangS = lang;
         }; //Yes I know that theres an error, but its being ignored. (Might fix this later...)
     } else {
@@ -69,15 +68,17 @@ client.on('ready', async () => {
 });
 
 client.on("guildCreate", async guild => {
-    if (!guild.available) return EventHandler.error.guildCreate(new Error("Guild Not Avaible"), errorLog, guild)
-            .catch(err => {if (debug.catchErrorToConsole) console.error(err)});
     if (debug.consoleAlerts) console.log(behl.guildCreate({guild:guild})); //Not needed
-    EventHandler.guildCreate(client, db, guild, lang, configFile)
-    .catch(err => EventHandler.error.guildCreate(err, errorLog, guild));
+    if (!guild.available) return EventHandler.error.guildCreateDelete(new Error("Guild Not Avaible"), errorLog, guild)
+            .catch(err => {if (debug.catchErrorToConsole) console.error(err)});
+    EventHandler.guildCreate(client, db, guild, lang)
+    .catch(err => EventHandler.error.guildCreateDelete(err, errorLog, guild));
 });
 
 client.on("guildDelete", async guild => {
        if (debug.consoleAlerts) console.log(behl.guildDelete({guild:guild})); //Not needed
+       EventHandler.guildDelete(client, db, guild)
+        .catch(err => EventHandler.error.guildCreateDelete(err, errorLog, guild));
 });
 
 client.on("guildMemberAdd", async member => {
@@ -91,8 +92,12 @@ client.on("guildMemberRemove", async member => {
 
 
 client.on('message', async message => {
+    let guildDb = await guildSet.findOne({ where: { guild_id: message.guild.id } });
+    if (guildDb === null) return EventHandler.guildCreate(client, db, message.guild)
+    .catch(err => EventHandler.error.guildCreate(err, errorLog, message.guild));
+    
   let cmLang = await getLang(message.guild).catch(err => console.error(err));
-    EventHandler.message(client, db, message, cmLang, configFile)
+    EventHandler.message(client, db, message, cmLang)
         .catch(err => EventHandler.error.message(err, errorLog, message));
   });
 

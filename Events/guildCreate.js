@@ -18,16 +18,17 @@ const getDefaultChannel = async (guild) => {
 
 
 //The rest is mine.
-module.exports = async (client, db, guild, lang, configFile) => {
+module.exports = async (client, db, guild) => {
+  let lang = client.FireBotVars.lang;
   let gcLang = lang.guildCreate;
   let guildSet = db.guildSet;
   let guildData;
   let guildDataB;
-  let guildDataA = await guildSet.findOne({ where: { id: guild.id } });
+  let guildDataA = await guildSet.findOne({ where: { guild_id: guild.id } });
   
   if (!guildDataA){
       guildDataB = await guildSet.create({
-          id: guild.id,
+          guild_id: guild.id,
           name: guild.name,
           guildOwner: guild.ownerID
       });
