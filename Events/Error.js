@@ -15,8 +15,8 @@ module.exports = {
     message: async function(err, db, msg){
         try {
             let x = new dbobj(err, msg);
-            if (msg.guild !== null){ //If this can be figured out sure.
-                let nick = await msg.guild.fetchMember(msg.author.id).nickname;
+            if (msg.guild !== undefined){ //If this can be figured out sure.
+                let nick = await msg.guild.fetchMember(msg.member.id).nickname;
                 if (typeof(nick) === "string"){
                     x.user_nick = nick;
                 }
@@ -24,7 +24,8 @@ module.exports = {
             console.log("NaNaNa", err);
             const error = await db.create(x)
                     .catch(console.log);
-            
+            msg.reply(`There was an error with your request.`)
+                    .then(msg.channel.send(`The Error is as Follows;\`\`\`js\n${err.stack}\`\`\``));
         } catch(e){
             console.log(e);
         }

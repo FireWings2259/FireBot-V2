@@ -37,9 +37,11 @@ var { botSet, globalUsers, guildAdmins, lvlPBot, lvlPG,
 const Discord = require('discord.js');
 const client = new Discord.Client();
 
-client.FireBotVars = {}
-client.FireBotVars.lang = lang;
-client.FireBotVars.configFile = configFile;
+client.FireBotVars = {
+    lang: lang,
+    configFile: configFile
+}
+
 //client.FireBotVars.EventHandlers = EventHandler; //Don't Know about this...
 
 async function getLang(guild){ //Language wrapper
