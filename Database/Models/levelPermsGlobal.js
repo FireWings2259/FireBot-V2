@@ -2,13 +2,15 @@ module.exports = (sqlize, DataTypes) => {
   return sqlize.define("levelPermsGlobal",{
     level_id:{
         type: DataTypes.INTEGER,
-	defaultValue: 0,
 	allowNull: false,
 	primaryKey: true
       },
     name:DataTypes.STRING,
     desc:DataTypes.STRING,
-    colour:DataTypes.STRING,
+    colour:{
+        type: DataTypes.STRING,
+        defaultValue: "#ffffff"
+    },
     perms: {
         type: DataTypes.JSON,
         defaultValue: {}

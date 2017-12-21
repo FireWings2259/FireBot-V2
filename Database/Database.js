@@ -47,12 +47,23 @@ function checkFirstRun(){
         
         if (!fs.existsSync(jp(cwd, "database.sqlite"))){
         console.log("DB Not Real! First Run!");
-        sqlize.sync().then(function(){
-         console.log("DB Created!");
-         resolve(true);
-        }).catch(function(e){
-            reject(e);
-        });
+        sqlize.sync()
+          .then(async ()=>{
+          await lvlPBot.create({
+               level_id:0,
+               name:"Maintainer",
+               desc:"This is the default group. ANYONE with this role can do ANYTHING with this bot. Be careful who gets this.",
+               perms:{all:true}
+           });
+           await botSet.create({
+               admin_id: configFile.bot.maintainer_id,
+               level: 0
+           });})
+          .then(console.log("DB Created!"))
+          .then(resolve(true))
+          .catch(e => { 
+             reject(e); 
+          });
     }else{
         console.log("Not First Run!");
         resolve(false);

@@ -13,7 +13,10 @@ module.exports = (sqlize, DataTypes) => {
       },
     name:DataTypes.STRING,
     desc:DataTypes.STRING,
-    colour:DataTypes.STRING,
+        colour:{
+        type: DataTypes.STRING,
+        defaultValue: "#ffffff"
+    },
     perms: {
         type: DataTypes.JSON,
         defaultValue: {}

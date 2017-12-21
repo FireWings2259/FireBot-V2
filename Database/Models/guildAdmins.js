@@ -5,7 +5,7 @@ module.exports = (sqlize, DataTypes) => {
         allowNull: false,
         primaryKey: true
       },
-      user_ID: {
+      user_id: {
         type: DataTypes.STRING,
         allowNull: false,
         primaryKey: true
@@ -16,9 +16,9 @@ module.exports = (sqlize, DataTypes) => {
         allowNull: false
       },
       level:{
-		    type: DataTypes.INTEGER,
-		    defaultValue: 0,
-		    allowNull: false
+        type: DataTypes.INTEGER,
+	defaultValue: 0,
+	allowNull: false
       }
     }, {timestamps: true});
 };

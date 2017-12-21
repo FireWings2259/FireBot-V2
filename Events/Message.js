@@ -26,12 +26,11 @@ function getHandler(cmd, cmdList){
     return undefined;
 };
 
-module.exports = async (client, db, message, lang) => {
+module.exports = async (client, db, message) => {
+    let lang = message.FireBot.lang;
     if (message.content === "stop" && message.author.id === client.FireBotVars.configFile.bot.maintainer_id) { //Only die on maintainer.
         return await client.destroy().then(process.exit(0)); //logout then quit
-    } /* else { 
-        console.log("Whoa Boy! " + message.author.tag + " just tried to kill the client!");
-    } */
+    } //else { console.log("Whoa Boy! " + message.author.tag + " just tried to kill the client!"); }
     
     var configFile = client.FireBotVars.configFile;
     let msgLang = lang.message;
@@ -41,9 +40,8 @@ module.exports = async (client, db, message, lang) => {
     
     //From this point on we are in a guild.
     
-    const guildSet =  await db.guildSet.findOne({ where: { guild_id: message.guild.id }});
+    const guildSet = message.FireBot.guildSet;  //await db.guildSet.findOne({ where: { guild_id: message.guild.id }});
     let prefix, cmd, cmdList, cmdString, cmdArgs, modHandle;
-    message.FireBot = {};
     prefix = message.FireBot.prefix = guildSet.get("prefix");
     cmdList = message.FireBot.cmdList = guildSet.get("commands");
     cmdString = message.FireBot.cmdString = message.content.slice(prefix.length);
@@ -60,7 +58,7 @@ module.exports = async (client, db, message, lang) => {
     if (guildSet.newServer && !((cmd === cmdList.base.help && firstArg) || cmd === cmdList.base.setup)) 
         return message.channel.send(lang.message.notSetup({msg:message, client:client, gSet:guildSet}));
     
-    Modules[modHandle][cmd](client, db, message, lang)
+    Modules[modHandle][cmd](client, db, message)
         .catch(err => {
             errorHandler.message(err, db.errorLog, message);
             if (configFile.debug.catchErrorToConsole) console.log(err);

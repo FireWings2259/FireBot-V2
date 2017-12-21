@@ -7,8 +7,8 @@ module.exports = (sqlize, DataTypes) => {
         },
         level:{
            type: DataTypes.INTEGER,
-		    defaultValue: 0,
-		    allowNull: false 
+           defaultValue: 0,
+	   allowNull: false 
         }
     }, {timestamps: true});
 };

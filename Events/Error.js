@@ -15,7 +15,7 @@ module.exports = {
     message: async function(err, db, msg){
         try {
             let x = new dbobj(err, msg);
-            if (msg.guild !== undefined){ //If this can be figured out sure.
+            if (msg.guild !== undefined){ 
                 let nick = await msg.guild.fetchMember(msg.member.id).nickname;
                 if (typeof(nick) === "string"){
                     x.user_nick = nick;
@@ -24,8 +24,8 @@ module.exports = {
             console.log("NaNaNa", err);
             const error = await db.create(x)
                     .catch(console.log);
-            msg.reply(`There was an error with your request.`)
-                    .then(msg.channel.send(`The Error is as Follows;\`\`\`js\n${err.stack}\`\`\``));
+            msg.reply(msg.FireBot.lang.message.error.msgPreTxt)
+                    .then(msg.channel.send(msg.FireBot.lang.message.error.msgTxt({err:err})));
         } catch(e){
             console.log(e);
         }
@@ -42,8 +42,7 @@ module.exports = {
     }
 };
 
-/*async*/ function dbobj(err, type, object){ //No longer Async...
-    //this.time = hdate.prettyPrint(new Date, { showTime: true, allUnits:true }); //Not Needed...
+function dbobj(err, type, object){
     this.error = err.toString();
     
     if(type === "general"){

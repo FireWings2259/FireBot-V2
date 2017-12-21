@@ -4,26 +4,6 @@
 //NOTE: When translating please translate everything ABOVE the *console* property as thats more important.
 //Thanks
 
-var sls = function(strings) { //
-  var values = Array.prototype.slice.call(arguments, 1);
-  
-  // Interweave the strings with the 
-  // substitution vars first.
-  var output = '';
-  for (var i = 0; i < values.length; i++) {  
-    output += strings[i] + values[i];
-  }
-  output += strings[values.length];
-
-  // Split on newlines.
-  var lines = output.split(/(?:\r\n|\n|\r)/);
-    
-  // Rip out the leading whitespace.
-  return lines.map(function(line) {
-    return line.replace(/^\s+/gm, '');  
-  }).join(' ').trim();
-};
-
 var selfObjError = function(obj) { //The self error function.
     return String(`Data Not Object! It's a '${typeof(obj)}'.`);
 };
@@ -46,26 +26,30 @@ module.exports = {
                   return x;
       },
       setup:{
+          yesNo:["yes", "no"],
           noPerms: ()=>{
             let x  = "You don't have the permissions to setup the bot! ";
                 x += "You need to have the permissions of 'Administrator', 'Manage Server' or has both 'Manage Channels' and 'Manage Roles'";
                 x += "to setup the bot.";
                 return x;
           },
-          checkChannel:function(obj){ //{gSet:"The Guild Settings DB Object"}
+          checkChannel: function(obj){ //{gSet:"The Guild Settings DB Object"}
               if (typeof(obj) !== "object") throw new Error(selfObjError(obj));
               let {gSet} = obj;
-              let x  = "Do you want to be asked the setup questions in this channel?"
+              let x  = "Do you want to be asked the setup questions in this channel?";
                   x += "\n:warning: API keys may be asked of you! You want to keep these private!";
                   x += "\nWe recomend useing a locked down channel for setup. You have been warned! :warning:";
-                  x += "\nClick the tick reaction if this is the channel you want to use for setup, if its not click the cross reaction, move to your perfered channel ";
+                  x += "\nType 'yes' if this is the channel you want to use, otherwise type 'no', move to your perfered channel ";
                   x += `and run the setup command (${gSet.get("prefix")}${gSet.get("commands").base.setup}) again.`;
+                  x += " Note: You have 15 seconds to reply, other wise the default answer (no) will be used.";
               return x;
           },
-        step1: function(obj){ //{msg: "The Message Object" client:"The Bot/Client Object", gSet:"The Guild Settings DB Object"}
+          cancelSetup:"Setup has been canceled! All settings have been lost and you will need re-run the setup command before you can use the bot.",
+          noTime:"You have not responded in time! Useing default value.",
+        askPrefix: function(obj){ //{msg: "The Message Object" client:"The Bot/Client Object", gSet:"The Guild Settings DB Object"}
                  if (typeof(obj) !== "object") throw new Error(selfObjError(obj));
-                 let {msg, client, gSet} = obj;
-                 let x = ``;
+                 let {gSet} = obj;
+                 let x = `By default the bot prefix is '${gSet.get("prefix")}'. Would you like to change this?\nReply with 'yes' or 'no' in 15 seconds or 'no' will be selected.`;
                  return x;
                },
         step2: function(obj){ //{msg: "The Message Object" client:"The Bot/Client Object", gSet:"The Guild Settings DB Object"}
@@ -74,7 +58,20 @@ module.exports = {
                  let x = ``;
                  return x;
                }
-      }
+      },
+      error:{
+            msg: ()=>{
+                let x  = "Whoa Dude! Something went wrong!\nPlease try the request again.";
+                    x += "\n(If you get this a 2nd or 3rd time please let the bot think for a bit and try the request later. ";
+                    x += "Oh and maby also let the bot maintainer know? :wink:)";
+                return x;
+             }, //00x000a00
+            msgPreText:"There was an error with your request.",
+            msgText: function(obj){ //{err: "The Error Object"}
+              if (typeof(obj) !== "object") throw new Error(selfObjError(obj)); 
+             return `The Error is as Follows;\`\`\`js\n${obj.err.stack}\`\`\``;      
+            }
+        }
     },
     guildCreate:{
       welcome:  function(obj){ //{guild: "The Guild Object" client:"The Bot/Client Object", gSet:"The Guild Settings DB Object"}
@@ -130,10 +127,10 @@ module.exports = {
         },
         error:{
             msg: "Whoa Dude! Error!", //00x000a00
-            db: {
+            db:{
                 firstrun: "Something broke... "
+               }
             }
-        }
     },
    errorCodes:{
        user_id: "No User ID", //00x000a01

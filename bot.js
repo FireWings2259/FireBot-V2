@@ -2,9 +2,9 @@
 //By FireWings
 
 //Setup some Constants / Varibles
-/* global __dirname */
 
 //Cross Platform Path Stuff
+/* global __dirname */
 var path = require("path");
 var jp = path.join;
 var cwd = __dirname; //Current Working Directory
@@ -44,9 +44,9 @@ client.FireBotVars = {
 
 //client.FireBotVars.EventHandlers = EventHandler; //Don't Know about this...
 
-async function getLang(guild){ //Language wrapper
-    let gLangS;
-    if (guild !== null){
+async function getLang(guild, guildSet){ //Language wrapper
+    let gLangS
+    if (guild !== null && guildSet === undefined){
         let guildID = guild.id;
         try {
             gLangS = await guildSet.findOne({ where: { guild_id: guildID } }).get("language");
@@ -55,6 +55,8 @@ async function getLang(guild){ //Language wrapper
             if (debug.catchErrorToConsole) console.log(e)
             gLangS = lang;
         }; //Yes I know that theres an error, but its being ignored. (Might fix this later...)
+    } else if (!guildSet){
+        gLangS = guildSet.get("language");
     } else {
         gLangS = lang;
     }
@@ -96,10 +98,14 @@ client.on("guildMemberRemove", async member => {
 client.on('message', async message => {
     let guildDb = await guildSet.findOne({ where: { guild_id: message.guild.id } });
     if (guildDb === null) return EventHandler.guildCreate(client, db, message.guild)
-    .catch(err => EventHandler.error.guildCreate(err, errorLog, message.guild));
+    .catch(err => EventHandler.error.guildCreateDelete(err, errorLog, message.guild));
     
-  let cmLang = await getLang(message.guild).catch(err => console.error(err));
-    EventHandler.message(client, db, message, cmLang)
+    let cmLang = await getLang(message.guild, guildDb).catch(err => console.error(err));
+    message.FireBot = {};
+    message.FireBot.guildSet = guildDb;
+    message.FireBot.lang = cmLang;
+    
+    EventHandler.message(client, db, message)
         .catch(err => EventHandler.error.message(err, errorLog, message));
   });
 
