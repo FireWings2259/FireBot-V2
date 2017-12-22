@@ -99,7 +99,7 @@ const lfFD = {
 2 arguments are given, The language then the location, with both as a Strings.
 1 object is given, in the form {lang: "LangStr", loc:"LocStr"} (With LangStr being the language, LocStr being the location, both as strings.)
 1 array is given, in the form ["LangStr", "LocStr"] (With LangStr being the language, LocStr being the location, both as strings.)
-3 arguments are given, with the Language and Location being anything and the 3rd argument being anything except undifined. 
+3 arguments are given, with the Language and Location being *anything* (their only there to fill space) and the 3rd argument being anything except undifined. 
             NOTE: !! THIS WILL GIVE THE ARRAY OF ALL AVAILABLE TRANSLATIONS NOT THE FILE THEMSELFS !!
 */
 

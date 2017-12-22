@@ -13,7 +13,8 @@ module.exports = {
         base:{
             setup:"setup",
             help:"help",
-            stop:"stop"
+            stop:"stop",
+            eval:"eval"
         }
     },
     message: {
@@ -27,12 +28,9 @@ module.exports = {
       },
       setup:{
           yesNo:["yes", "no"],
-          noPerms: ()=>{
-            let x  = "You don't have the permissions to setup the bot! ";
-                x += "You need to have the permissions of 'Administrator', 'Manage Server' or has both 'Manage Channels' and 'Manage Roles'";
-                x += "to setup the bot.";
-                return x;
-          },
+          noPerms: "You don't have the permissions to setup the bot! "
+                 + "You need to have the permissions of 'Administrator', 'Manage Server' or has both 'Manage Channels' and 'Manage Roles'"
+                 + "to setup the bot.",
           checkChannel: function(obj){ //{gSet:"The Guild Settings DB Object"}
               if (typeof(obj) !== "object") throw new Error(selfObjError(obj));
               let {gSet} = obj;
@@ -60,12 +58,10 @@ module.exports = {
                }
       },
       error:{
-            msg: ()=>{
-                let x  = "Whoa Dude! Something went wrong!\nPlease try the request again.";
-                    x += "\n(If you get this a 2nd or 3rd time please let the bot think for a bit and try the request later. ";
-                    x += "Oh and maby also let the bot maintainer know? :wink:)";
-                return x;
-             }, //00x000a00
+            msg: "Whoa Dude! Something went wrong!\nPlease try the request again."
+               + "\n(If you get this a 2nd or 3rd time please let the bot think for a bit and try the request later. "
+               + "Oh and maby also let the bot maintainer know? :wink:)", //00x000a00
+       
             msgPreText:"There was an error with your request.",
             msgText: function(obj){ //{err: "The Error Object"}
               if (typeof(obj) !== "object") throw new Error(selfObjError(obj)); 
@@ -107,9 +103,9 @@ module.exports = {
                 },
                 guildMemberRemove: function(obj){ //{member: "The Guild Object", client: "The Bot/Client Object"}
                     if (typeof(obj) !== "object") throw new Error(selfObjError(obj)); 
-                    let x = `So ${obj.member.user.tag} (@${obj.member.id})`; 
+                    let x = `So ${obj.member.user.tag} (@<${obj.member.id}>)`; 
                     if (obj.member.id === obj.client.user.id){x += ` (Me!)`;};
-                    x += ` left ${obj.member.guild.name}`;
+                    x += ` left ${obj.member.guild.name} (${obj.member.guild.id})`;
                     return x;
                 }
             },

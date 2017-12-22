@@ -41,13 +41,20 @@ module.exports = async (client, db, message) => {
     //From this point on we are in a guild.
     
     const guildSet = message.FireBot.guildSet;  //await db.guildSet.findOne({ where: { guild_id: message.guild.id }});
-    let prefix, cmd, cmdList, cmdString, cmdArgs, modHandle;
+    let prefix, cmd, cmdList, cmdString, cmdArgs, modHandle, overide;
     prefix = message.FireBot.prefix = guildSet.get("prefix");
     cmdList = message.FireBot.cmdList = guildSet.get("commands");
     cmdString = message.FireBot.cmdString = message.content.slice(prefix.length);
     cmd = message.FireBot.cmd = cmdString.split(" ")[0].toLowerCase();
     cmdArgs = message.FireBot.cmdArgs = cmdString.slice(cmd.length);
-    
+     
+    if (cmd.startsWith("+")){
+         overide = true;
+         cmd = cmd.slice(1);
+     } else{
+         overide = false;
+     }
+         
     if (!message.content.startsWith(prefix)) return;
     modHandle = message.FireBot.modHandle = getHandler(cmd, cmdList);
     if (!modHandle) return; //Not Valid command
@@ -55,7 +62,7 @@ module.exports = async (client, db, message) => {
     let firstArg = cmdArgs.split(" ")[1];
     if (!firstArg) { firstArg  = false; } else { firstArg = firstArg.toLowerCase() === cmdList.base.setup; }
     message.FireBot.firstArg = firstArg;
-    if (guildSet.newServer && !((cmd === cmdList.base.help && firstArg) || cmd === cmdList.base.setup)) 
+    if (guildSet.newServer && !((cmd === cmdList.base.help && firstArg) || cmd === cmdList.base.setup || overide)) 
         return message.channel.send(lang.message.notSetup({msg:message, client:client, gSet:guildSet}));
     
     Modules[modHandle][cmd](client, db, message)

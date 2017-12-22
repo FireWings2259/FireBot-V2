@@ -44,7 +44,20 @@ module.exports = {
     help: async (client, db, message) => {
         let { guildSet, lang, prefix, cmdList, cmdString, cmd, cmdArgs, modHandle, firstArg } = message.FireBot;
            
-    }
+    },
+    eval: async (client, db, message) => {
+        let { guildSet, lang, prefix, cmdList, cmdString, cmd, cmdArgs, modHandle, firstArg } = message.FireBot;
+        
+        if (message.member.id !== client.FireBotVars.configFile.bot.maintainer_id) return message.reply("No! No Eval for you!");
+        
+        try {
+            eval(cmdArgs);
+        } catch(e){
+            message.reply(lang.message.error.msg);
+            message.channel.send(lang.message.error.msgText({err:e}));
+        }
+      }
+       
 };
 
 function setup(client, db, message, originalMessage){
@@ -89,12 +102,17 @@ function setup(client, db, message, originalMessage){
                const numFilt = m => basicFilter(m) && typeof(parseInt(m.content)) === "number";
                m.channel.awaitMessage(numFilt, {maxMatches:1, time:15000, errors:['time']})
                        .then(c => new Promise((res, rec) => {
-                           let m = c.first();
-                           let num = parseInt(m.content);
-                           
-                           
-                           }).catch(c => rec(c.first()))
-                      ).catch();
+                               let m = c.first();
+                               let num = parseInt(m.content);
+                               if (typeof(num) !== "number") return rec("NaN", c);
+                               //We have a number now lets check/do the thing with it.
+                               let lang = langList(true, num);
+                               if (lang === false) return rec("NvL", c);
+                               res(m, lang);         
+                              })
+                           .then()
+                           .catch((r, c) => {})
+                      ).catch(c => console.log("Next", c));
            });    
 };
 
