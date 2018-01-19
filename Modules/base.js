@@ -30,12 +30,12 @@ module.exports = {
                if (m.content === lang.message.setup.yesNo[0] || m.content === lang.message.setup.yesNo[0].charAt(0)){
                setup(client, db, m, message);
            } else {
-               return m.channel.send(lang.message.setup.cancelSetup);
+               return message.channel.send(lang.message.setup.cancelSetup);
            }
            } else if (r === "time"){
-               return m.channel.send(`${lang.message.setup.noTime}\n${lang.message.setup.cancelSetup}`);
+               return message.channel.send(`${lang.message.setup.noTime}\n${lang.message.setup.cancelSetup}`);
            } else {
-                return m.channel.send(`${lang.message.error.msg()}\nAlso note: ${lang.message.setup.cancelSetup}`);
+                return message.channel.send(`${lang.message.error.msg()}\nAlso note: ${lang.message.setup.cancelSetup}`);
            }
        });
        
@@ -48,6 +48,7 @@ module.exports = {
     eval: async (client, db, message) => {
         let { guildSet, lang, prefix, cmdList, cmdString, cmd, cmdArgs, modHandle, firstArg } = message.FireBot;
         
+        if (!client.FireBotVars.configFile.bot.enableEval) return message.reply("Eval has been disabled. See the bot owner if you think this is an error.");
         if (message.member.id !== client.FireBotVars.configFile.bot.maintainer_id) return message.reply("No! No Eval for you!");
         
         try {
@@ -56,8 +57,12 @@ module.exports = {
             message.reply(lang.message.error.msg);
             message.channel.send(lang.message.error.msgText({err:e}));
         }
-      }
-       
+      }, //[TODO]Move text to Lang[/TODO]
+    stop: async (client, db, message) => {
+        if (message.member.id === client.FireBotVars.configFile.bot.maintainer_id) return process.exit(0);
+    },
+    debug: async (client, db, message) => {}
+      
 };
 
 function setup(client, db, message, originalMessage){
@@ -75,51 +80,111 @@ function setup(client, db, message, originalMessage){
         deleteCmd: guildSet.get("deleteCmd")
     };
     
-    message.channel.send(lang.message.setup.askPrefix({gSet:guildSet}));
-    message.channel.awaitMessages(ynFilter, {maxMatches:1, time:15000, errors:['time']})
-           .then(c => new Promise(function(res, rec){
-             let m = c.first();
-             console.log(m.content !== yesNo[0] && m.content !== yesNo[0].charAt(0));
-             if (m.content !== yesNo[0] && m.content !== yesNo[0].charAt(0)){ return res(m); }
-             m.channel.send("You have 15 seconds to enter a new prefix.\nRemember prefixes are CaSe SeNsItIvE. Note: If you enter more then one word (There is a/many space/s) only the first word will be used.");
-             m.channel.awaitMessages(basicFilter, {maxMatches:1, time:15000, errors:['time']})
-                     .then(c => {
-                         let m = c.first();
-                         let newPre = m.content.split(" ")[0];
-                         m.channel.send(`Enter 'yes' to confirm the new prefix of '${newPre}' or 'no' to cancel and use '${gSet.prefix}' as your prefix.\nYou have 15 seconds to enter otherwise no changes are made.`);
-                         m.channel.awaitMessages(ynFilter, {maxMatches:1, time:15000, errors:['time']})
-                                 .then(c => new Promise((a, r) => {
-                                     if (c.first().content !== yesNo[0] && c.first().content !== yesNo[0].charAt(0)){ c.first().channel.send(`Prefix is still ${gSet.prefix}`); return a(c.first()); }
-                                     else {gSet.prefix = newPre; c.first().channel.send(`New prefix set to ${newPre}`); return a(c.first());} }))
-                                 .catch(c => { c.first().channel.send(`Prefix is still ${gSet.prefix}`); a(c.first()); })
-                                 .then(m => res(m));
-                   }).catch(c => { c.first().channel.send(`No prefix entered! Prefix not changing from ${gSet.prefix}`); return res(c.first()); });
-                   
-           }))
-           .catch(c => console.log(c))
-           .then(m => {
-               m.channel.send(langList());
-               const numFilt = m => basicFilter(m) && typeof(parseInt(m.content)) === "number";
-               m.channel.awaitMessage(numFilt, {maxMatches:1, time:15000, errors:['time']})
-                       .then(c => new Promise((res, rec) => {
-                               let m = c.first();
-                               let num = parseInt(m.content);
-                               if (typeof(num) !== "number") return rec("NaN", c);
-                               //We have a number now lets check/do the thing with it.
-                               let lang = langList(true, num);
-                               if (lang === false) return rec("NvL", c);
-                               res(m, lang);         
-                              })
-                           .then()
-                           .catch((r, c) => {})
-                      ).catch(c => console.log("Next", c));
-           });    
-};
+    //Now I know i could do this all with promises, but since i scrapped that part like 3 times, Im useing this. (If you can make it do the thing with out braking go ahead)
+    new Promise((accept, reject) => {
+        message.channel.send(lang.message.setup.askPrefix({gSet:guildSet}));
+        const p1 = message.channel.createMessageCollector(ynFilter, {maxMatches:1, time:15000, errors:['time']});
+        p1.on('end', (c, r) => {
+            let m = c.first();
+            if (r === "matchesLimit" || r === "limit"){
+                if (m.content !== yesNo[0] && m.content !== yesNo[0].charAt(0)){ return accept(m);}
+                m.channel.send(`Enter new prefix.`);
+                const p2 = m.channel.createMessageCollector(basicFilter, {maxMatches:1, time:15000, errors:['time']});
+                p2.on('end', (c, r) =>{
+                    m = c.first();
+                    if (r === "matchesLimit" || r === "limit"){
+                        let newPre = m.content.split(" ")[0];
+                        m.channel.send(lang.message.setup.conNewPrefix({newPre: newPre, gSet: gSet}));
+                        const p3 = m.channel.createMessageCollector(ynFilter, {maxMatches:1, time:15000, errors:['time']});
+                        p3.on('end', (c, r) => {
+                           m = c.first();
+                           if (r === "matchesLimit" || r === "limit"){
+                               if (m.content !== yesNo[0] && m.content !== yesNo[0].charAt(0)){ return accept(m);}
+                               m.channel.send(`New prefix set to ${newPre}`);
+                               gSet.prefix = newPre;
+                               accept(m);
+                           } else if (r === "time"){
+                                message.channel.send(lang.message.setup.noTime.slice(0, -1) + " of no.\nNote, no changes to the prefix have been made.");
+                                return accept(message);
+                            } else {
+                                message.channel.send(`Whoa There! How you got here I don't know but you broke a thing. Were skipping this step.`);
+                                accept(message);
+                            }
+                        });
+                    } else if (r === "time"){
+                        message.channel.send(lang.message.setup.noTime.slice(0, -22) + "\nNote, no changes to the prefix have been made.");
+                        return accept(message);
+                    } else {
+                        message.channel.send(`Whoa There! How you got here I don't know but you broke a thing. Were skipping this step.`);
+                        accept(message);
+                    }
+                });
+            } else if (r === "time"){
+                message.channel.send(lang.message.setup.noTime.slice(0, -1) + " of no.\nNote, no changes to the prefix have been made.");
+                return accept(message);
+            } else {
+                message.channel.send(`Whoa There! How you got here I don't know but you broke a thing. Were skipping this step.`);
+                accept(message);
+            }
+        });
+    }) //Prefix Management Stuff
+    .then(message => new Promise((accept, reject) =>{
+        message.channel.send(`ff`);
+        const p1 = message.channel.createMessageCollector(ynFilter, {maxMatches:1, time:15000, errors:['time']});
+        p1.on('end', (c, r) => {
+            let m = c.first();
+            if (r === "matchesLimit" || r === "limit"){
+                if (m.content !== yesNo[0] && m.content !== yesNo[0].charAt(0)){ return accept(m);}
+                m.channel.send(langList([lang.message.setup.lang.ask]));
+                const p2 = m.channel.createMessageCollector(basicFilter, {maxMatches:1, time:15000, errors:['time']});
+                p2.on('end', (c, r) =>{
+                    m = c.first();
+                    if (r === "matchesLimit" || r === "limit"){
+                        let newPre = m.content.split(" ")[0];
+                        m.channel.send(lang.message.setup.conNewPrefix({newPre: newPre, gSet: gSet}));
+                        const p3 = m.channel.createMessageCollector(ynFilter, {maxMatches:1, time:15000, errors:['time']});
+                        p3.on('end', (c, r) => {
+                           m = c.first();
+                           if (r === "matchesLimit" || r === "limit"){
+                               if (m.content !== yesNo[0] && m.content !== yesNo[0].charAt(0)){ return accept(m);}
+                               m.channel.send(`New prefix set to ${newPre}`);
+                               gSet.prefix = newPre;
+                               accept(m);
+                           } else if (r === "time"){
+                                message.channel.send(lang.message.setup.noTime.slice(0, -1) + " of no.\nNote, no changes to the prefix have been made.");
+                                return accept(message);
+                            } else {
+                                message.channel.send(`Whoa There! How you got here I don't know but you broke a thing. Were skipping this step.`);
+                                accept(message);
+                            }
+                        });
+                    } else if (r === "time"){
+                        message.channel.send(lang.message.setup.noTime.slice(0, -22) + "\nNote, no changes to the prefix have been made.");
+                        return accept(message);
+                    } else {
+                        message.channel.send(`Whoa There! How you got here I don't know but you broke a thing. Were skipping this step.`);
+                        accept(message);
+                    }
+                });
+            } else if (r === "time"){
+                message.channel.send(lang.message.setup.noTime.slice(0, -1) + " of no.\nNote, no changes to the prefix have been made.");
+                return accept(message);
+            } else {
+                message.channel.send(`Whoa There! How you got here I don't know but you broke a thing. Were skipping this step.`);
+                accept(message);
+            }
+        });
+    })) //Language Management Stuff
+    .then(()=>{
+        getLangName(gSet.language);
+    })
+    ;
+}
 
-function langList(makeLangSetting, num){
-    let langArray = LangSelector(null, null, true);
-    if (makeLangSetting !== true){
-        let x = "You have 15 seconds to enter the number corresponding to the language you want to use on this server as an intiger (IE '1' not 'one') otherwise it will not change.\nThe bot is avlible in the folowing languages.";
+function langList(makeLangSetting, num, other){
+    let langArray = LangSelector(null, null, true); //Get lang list
+    if (makeLangSetting !== true && typeof(makeLangSetting === "object")){
+        let x = makeLangSetting[0]; //[TODO] Move this [/TODO]
         let names = langArray[0];
         let j = 0;
         for (i=0;i < names.length;i++){
@@ -134,8 +199,23 @@ function langList(makeLangSetting, num){
           }  
         }
         return x;
-    }else{
+    } else if (makeLangSetting && other){
+        let names = langArray[0];
+        let j = 0;
+        for (i=0;i < names.length;i++){
+          for (ii=0;ii < names[i].length;ii++){
+              if (names[i].length === 1) {
+                  j++;
+                  if (j === num) return `${names[i][ii]}`;
+              } else if (ii > 0){
+                  j++;
+                  if (j === num) return `${names[i][ii]} ${names[i][0]}`;
+              }
+          }  
+        }
+    } else {
         let array = langArray[1];
+        let names = langArray[0];
         let j = 0;
         for (i=0;i < names.length;i++){
           for (ii=0;ii < names[i].length;ii++){
@@ -151,3 +231,25 @@ function langList(makeLangSetting, num){
         return false;
     }
 }
+
+function getLangName(lLang){
+    let lang = lLang.lang;
+    let loc = lLang.loc;
+    if (loc === undefined) loc = "DEFAULT";
+    
+    let langArray = LangSelector(null, null, true); //Get lang list
+    let names = langArray[0];
+    let array = langArray[1];
+    
+    for(i=0; i < array.length; i++){
+        if (lang === array[i][0]){
+            for (ii=0; ii < array[i].length; ii++){
+                if (loc === array[i][ii]){
+                    if (loc === "DEFAULT") return `${names[i]}`;
+                    return `${names[i][ii]} ${names[i][0]}`;
+                }
+            }
+        }
+    }
+}
+

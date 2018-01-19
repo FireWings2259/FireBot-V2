@@ -22,6 +22,7 @@ if (fs.existsSync(jp(cwd, "dev.config.json"))) {
 //This is the debug options...
 if (configFile.debug !== undefined){
     if (configFile.debug.promiseCrash === true) { //Crash on failed Promise Thats not covered...
+        console.log("PromiseCrashingEnabled!");
         process.on('unhandledRejection', (err) => { 
           console.error(err);
           process.exit(1);

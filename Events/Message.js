@@ -27,6 +27,8 @@ function getHandler(cmd, cmdList){
 };
 
 module.exports = async (client, db, message) => {
+    if (message.author.bot) return; //console.log(msg.author.username + " is a client! Not Touching!");
+    
     let lang = message.FireBot.lang;
     if (message.content === "stop" && message.author.id === client.FireBotVars.configFile.bot.maintainer_id) { //Only die on maintainer.
         return await client.destroy().then(process.exit(0)); //logout then quit
@@ -34,8 +36,7 @@ module.exports = async (client, db, message) => {
     
     var configFile = client.FireBotVars.configFile;
     let msgLang = lang.message;
-
-    if (message.author.bot) return; //console.log(msg.author.username + " is a client! Not Touching!");
+    
     if (message.channel.type === 'dm') return message.reply(msgLang.dm); //For now
     
     //From this point on we are in a guild.
@@ -55,7 +56,7 @@ module.exports = async (client, db, message) => {
          overide = false;
      }
          
-    if (!message.content.startsWith(prefix)) return;
+    if (!message.content.startsWith(prefix)) return; //Wounder about moving this alot closer to the top
     modHandle = message.FireBot.modHandle = getHandler(cmd, cmdList);
     if (!modHandle) return; //Not Valid command
     

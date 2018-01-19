@@ -45,7 +45,7 @@ client.FireBotVars = {
 //client.FireBotVars.EventHandlers = EventHandler; //Don't Know about this...
 
 async function getLang(guild, guildSet){ //Language wrapper
-    let gLangS
+    let gLangS;
     if (guild !== null && guildSet === undefined){
         let guildID = guild.id;
         try {
@@ -93,7 +93,6 @@ client.on("guildMemberAdd", async member => {
 client.on("guildMemberRemove", async member => {
     if (debug.consoleAlerts) console.log(behl.guildMemberRemove({member:member, client:client})); //Not needed
 });
-
 
 client.on('message', async message => {
     let guildDb = await guildSet.findOne({ where: { guild_id: message.guild.id } });

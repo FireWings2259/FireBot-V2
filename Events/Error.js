@@ -24,8 +24,8 @@ module.exports = {
             console.log("NaNaNa", err);
             const error = await db.create(x)
                     .catch(console.log);
-            msg.reply(msg.FireBot.lang.message.error.msgPreTxt)
-                    .then(msg.channel.send(msg.FireBot.lang.message.error.msgTxt({err:err})));
+            msg.reply(msg.FireBot.lang.message.error.msgPreText)
+                    .then(msg.channel.send(msg.FireBot.lang.message.error.msgText({err:err})));
         } catch(e){
             console.log(e);
         }

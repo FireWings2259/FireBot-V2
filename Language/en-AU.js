@@ -14,7 +14,8 @@ module.exports = {
             setup:"setup",
             help:"help",
             stop:"stop",
-            eval:"eval"
+            eval:"eval",
+            debug:"debug"
         }
     },
     message: {
@@ -44,18 +45,26 @@ module.exports = {
           },
           cancelSetup:"Setup has been canceled! All settings have been lost and you will need re-run the setup command before you can use the bot.",
           noTime:"You have not responded in time! Useing default value.",
-        askPrefix: function(obj){ //{msg: "The Message Object" client:"The Bot/Client Object", gSet:"The Guild Settings DB Object"}
+          askPrefix: function(obj){ //{msg: "The Message Object" client:"The Bot/Client Object", gSet:"The Guild Settings DB Object"}
                  if (typeof(obj) !== "object") throw new Error(selfObjError(obj));
                  let {gSet} = obj;
                  let x = `By default the bot prefix is '${gSet.get("prefix")}'. Would you like to change this?\nReply with 'yes' or 'no' in 15 seconds or 'no' will be selected.`;
                  return x;
                },
-        step2: function(obj){ //{msg: "The Message Object" client:"The Bot/Client Object", gSet:"The Guild Settings DB Object"}
+          newPrefix:"You have 15 seconds to enter a new prefix.\nRemember prefixes are CaSe SeNsItIvE. Note: If you enter more then one "
+             + "word (There is a/many space/s) only the first word will be used.",
+          conNewPrefix: function(obj){ //{newPre: "The new Prefix", gSet:"The Guild Settings DB Object"}
                  if (typeof(obj) !== "object") throw new Error(selfObjError(obj));
-                 let {msg, client, gSet} = obj;
-                 let x = ``;
+                 let {newPre, gSet} = obj;
+                 let x  = `Enter 'yes' to confirm the new prefix of '${newPre}' or 'no' to cancel and use '${gSet.prefix}' `;
+                     x += `as your prefix.\nYou have 15 seconds to enter otherwise no changes are made.`;
                  return x;
-               }
+               },
+          lang:{
+              ask: "Do you want to change the language?",
+              tell:"You have 15 seconds to enter the number corresponding to the language you want to use on this server as an integer (IE '1' not 'one') "
+                + "otherwise it will not change.\nThe bot is avlible in the folowing languages."              
+          }
       },
       error:{
             msg: "Whoa Dude! Something went wrong!\nPlease try the request again."
@@ -128,7 +137,7 @@ module.exports = {
                }
             }
     },
-   errorCodes:{
+    errorCodes:{
        user_id: "No User ID", //00x000a01
        user_name: "No User Name", //00x000a02
        user_nick: "No User Nickname", //00x000a03
