@@ -5,6 +5,7 @@
         "default_lang": ["en", "AU"],
         "default_prefix": "!",
         "delete_lost_guild": true,
-        "enableEval": false
+        "enableEval": false,
+        "devMessage":true
     }
 }

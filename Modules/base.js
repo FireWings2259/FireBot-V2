@@ -129,7 +129,8 @@ function setup(client, db, message, originalMessage){
         });
     }) //Prefix Management Stuff
     .then(message => new Promise((accept, reject) =>{
-        message.channel.send(`ff`);
+        message.channel.send(`The current language is set to ${getLangName({lang:client.FireBotVars.configFile.bot.default_lang[0], loc:client.FireBotVars.configFile.bot.default_lang[1]})}.`
+                            + `Would you like to change this?\nReply with 'yes' or 'no' in 15 seconds or 'no' will be selected.`);
         const p1 = message.channel.createMessageCollector(ynFilter, {maxMatches:1, time:15000, errors:['time']});
         p1.on('end', (c, r) => {
             let m = c.first();
@@ -140,15 +141,16 @@ function setup(client, db, message, originalMessage){
                 p2.on('end', (c, r) =>{
                     m = c.first();
                     if (r === "matchesLimit" || r === "limit"){
-                        let newPre = m.content.split(" ")[0];
-                        m.channel.send(lang.message.setup.conNewPrefix({newPre: newPre, gSet: gSet}));
+                        let num = m.content.split(" ")[0];
+                        if (isNaN(num)){m.channel.send(``)}
+                        m.channel.send(`Enter 'yes' to confirm ${langList(true, num, true)} or 'no' to cancel and use '#' as your prefix.\nYou have 15 seconds to enter otherwise no changes are made.`);
                         const p3 = m.channel.createMessageCollector(ynFilter, {maxMatches:1, time:15000, errors:['time']});
                         p3.on('end', (c, r) => {
                            m = c.first();
                            if (r === "matchesLimit" || r === "limit"){
                                if (m.content !== yesNo[0] && m.content !== yesNo[0].charAt(0)){ return accept(m);}
-                               m.channel.send(`New prefix set to ${newPre}`);
-                               gSet.prefix = newPre;
+                               m.channel.send(`New prefix set to ${num}`);
+                               gSet.language = num;
                                accept(m);
                            } else if (r === "time"){
                                 message.channel.send(lang.message.setup.noTime.slice(0, -1) + " of no.\nNote, no changes to the prefix have been made.");
@@ -175,9 +177,45 @@ function setup(client, db, message, originalMessage){
             }
         });
     })) //Language Management Stuff
-    .then(()=>{
-        getLangName(gSet.language);
-    })
+    .then(message => new Promise((accept, reject) =>{
+        message.send(`By default, the option to recive messages is ${gSet.devMessage ? "enabled" : "disabled"}.`
+                    +`Would you like set this to ${!gSet.devMessage ? "enabled" : "disabled"}?\nReply with 'yes'or 'no' in 15 seconds or 'no' will be selected.`);
+        const p1 = message.channel.createMessageCollector(ynFilter, {maxMatches:1, time:15000, errors:['time']});
+        p1.on('end', (c, r) => {
+            let m = c.first();
+            if (r === "matchesLimit" || r === "limit"){
+                if (m.content !== yesNo[0] && m.content !== yesNo[0].charAt(0)){ return accept(m);}
+                gSet.devMessage = !gSet.devMessage;
+                return accept(m);
+            } else if (r === "time"){
+                message.channel.send(lang.message.setup.noTime.slice(0, -22) + `\nNote, dev messages are still ${gSet.devMessage ? "enabled" : "disabled"}`);
+                return accept(message);
+            } else {
+                message.channel.send(`Whoa There! How you got here I don't know but you broke a thing. Were skipping this step.`);
+                accept(message);
+            }
+        });
+    }))//Dev Message Stuff
+    .then(message => new Promise((accept, reject) =>{
+        message.channel.send(`By default, the option to delete bot commands is ${gSet.deleteCmd ? "enabled" : "disabled"}.`
+                    +`Would you like set this to ${!gSet.deleteCmd ? "enabled" : "disabled"}?\nReply with 'yes'or 'no' in 15 seconds or 'no' will be selected.`);
+        const p1 = message.channel.createMessageCollector(ynFilter, {maxMatches:1, time:15000, errors:['time']});
+        p1.on('end', (c, r) => {
+            let m = c.first();
+            if (r === "matchesLimit" || r === "limit"){
+                if (m.content !== yesNo[0] && m.content !== yesNo[0].charAt(0)){ return accept(m);}
+                gSet.devMessage = !gSet.devMessage;
+                return accept(m);
+            } else if (r === "time"){
+                message.channel.send(lang.message.setup.noTime.slice(0, -22) + `\nNote, deleting bot commands are still ${gSet.deleteCmd ? "enabled" : "disabled"}`);
+                return accept(message);
+            } else {
+                message.channel.send(`Whoa There! How you got here I don't know but you broke a thing. Were skipping this step.`);
+                accept(message);
+            }
+        });
+    }))//Del CMD Stuff
+    .then(message => {console.log(gSet);})
     ;
 }
 
@@ -251,5 +289,6 @@ function getLangName(lLang){
             }
         }
     }
+    return false;
 }
 

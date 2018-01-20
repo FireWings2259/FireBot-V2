@@ -17,7 +17,7 @@ module.exports = (sqlize, DataTypes, lang, configFile) => {
     },
     devMessage: {
       type: DataTypes.BOOLEAN,
-      defaultValue: false
+      defaultValue: configFile.bot.devMessage
     },
     deleteCmd: {
       type: DataTypes.BOOLEAN,
