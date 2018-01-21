@@ -28,7 +28,8 @@ module.exports = {
                   return x;
       },
       setup:{
-          yesNo:["yes", "no"],
+          yesNoCan:["yes", "no", "cancel"],
+          disEnAbled:["disabled", "enabled"],
           noPerms: "You don't have the permissions to setup the bot! "
                  + "You need to have the permissions of 'Administrator', 'Manage Server' or has both 'Manage Channels' and 'Manage Roles'"
                  + "to setup the bot.",
@@ -43,27 +44,93 @@ module.exports = {
                   x += " Note: You have 15 seconds to reply, other wise the default answer (no) will be used.";
               return x;
           },
-          cancelSetup:"Setup has been canceled! All settings have been lost and you will need re-run the setup command before you can use the bot.",
+          cancelSetup:"Setup has been canceled! All settings have been lost and you will need re-run the setup command before you can use the bot if it has not already been setup.",
           noTime:"You have not responded in time! Useing default value.",
-          askPrefix: function(obj){ //{msg: "The Message Object" client:"The Bot/Client Object", gSet:"The Guild Settings DB Object"}
-                 if (typeof(obj) !== "object") throw new Error(selfObjError(obj));
-                 let {gSet} = obj;
-                 let x = `By default the bot prefix is '${gSet.get("prefix")}'. Would you like to change this?\nReply with 'yes' or 'no' in 15 seconds or 'no' will be selected.`;
-                 return x;
-               },
-          newPrefix:"You have 15 seconds to enter a new prefix.\nRemember prefixes are CaSe SeNsItIvE. Note: If you enter more then one "
-             + "word (There is a/many space/s) only the first word will be used.",
-          conNewPrefix: function(obj){ //{newPre: "The new Prefix", gSet:"The Guild Settings DB Object"}
-                 if (typeof(obj) !== "object") throw new Error(selfObjError(obj));
-                 let {newPre, gSet} = obj;
-                 let x  = `Enter 'yes' to confirm the new prefix of '${newPre}' or 'no' to cancel and use '${gSet.prefix}' `;
-                     x += `as your prefix.\nYou have 15 seconds to enter otherwise no changes are made.`;
-                 return x;
-               },
+          setupSkip:`Whoa There! How you got here I don't know but you broke a thing. Were skipping this step.`,
+          askChange: function(yes){
+              if (yes == undefined) yes = false;
+              let y = yes ? "yes" : "no"; 
+              return `Would you like to change this?\nReply with 'yes' or 'no' in 15 seconds or '${y}' will be selected.`; 
+          },
+          prefix: {
+              askChange: function(yes){
+              if (yes == undefined) yes = false;
+              let y = yes ? "yes" : "no"; 
+              return `Would you like to change this?\nReply with 'yes' or 'no' in 15 seconds or '${y}' will be selected.`; 
+          },
+              noChange: "\nNote, no changes to the prefix have been made.",
+              askPrefix: function(obj){ //{msg: "The Message Object" client:"The Bot/Client Object", gSet:"The Guild Settings DB Object"}
+                       if (typeof(obj) !== "object") throw new Error(selfObjError(obj));
+                       let {gSet} = obj;
+                       let x = `By default the bot prefix is '${gSet.get("prefix")}'. ` + this.askChange(false);
+                       return x;
+                     },
+              setPre: function(obj){ //value:"The new prefix"}
+                       if (typeof(obj) !== "object") throw new Error(selfObjError(obj));
+                       let {y} = obj;
+                       return `New prefix set to ${y.value}`;
+                     },
+              newPrefix:"You have 15 seconds to enter a new prefix.\nRemember prefixes are CaSe SeNsItIvE. Note: If you enter more then one "
+                      + "word (There is a/many space/s) only the first word will be used.",
+              conNewPrefix: function(obj){ //{newPre: "The new Prefix", gSet:"The Guild Settings DB Object"}
+                       if (typeof(obj) !== "object") throw new Error(selfObjError(obj));
+                       let {newPre, gSet} = obj;
+                       let x  = `Enter 'yes' to confirm the new prefix of '${newPre}' or 'no' to cancel and use '${gSet.prefix}' `;
+                           x += `as your prefix.\nYou have 15 seconds to enter otherwise no changes are made.`;
+                       return x;
+                     },
+              defno:' of no.'
+          },
           lang:{
-              ask: "Do you want to change the language?",
+              askChange: function(yes){
+                if (yes == undefined) yes = false;
+                let y = yes ? "yes" : "no"; 
+                return `Would you like to change this?\nReply with 'yes' or 'no' in 15 seconds or '${y}' will be selected.`; 
+              },
+              noChange:`Note, Language setting has not changed!`,
+              vNaN:`Your input was not a number.\n`,
+              vNvL:`Your input was not a vaild language.\n`,
+              ask: function(obj){ //value:"The new prefix"}
+                      if (typeof(obj) !== "object") throw new Error(selfObjError(obj));
+                      let {value} = obj;
+                      return `The current language is set to ${value}. ` + this.askChange(false);
+                   },
+              confLang:function(obj){ //value:"The new prefix"}
+                      if (typeof(obj) !== "object") throw new Error(selfObjError(obj));
+                      let {y} = obj;
+                      return `Enter 'yes' to confirm ${y.value} or 'no' to cancel and not change the language.\nYou have 15 seconds to enter otherwise no changes are made.`;
+                   },
+               defNo:" of no.\n",   
               tell:"You have 15 seconds to enter the number corresponding to the language you want to use on this server as an integer (IE '1' not 'one') "
-                + "otherwise it will not change.\nThe bot is avlible in the folowing languages."              
+                + "otherwise it will not change.\nThe bot is avlible in the folowing languages."     
+          },
+          devMess:{
+              askDev: function(obj){ //value:"DevMessages"} 
+                        if (typeof(obj) !== "object") throw new Error(selfObjError(obj));
+                        let {y} = obj;
+                        let x  = `By default, the option to recive messages is ${y.value ? "enabled" : "disabled"}. `;
+                            x += `Would you like set this to ${!y.value ? "enabled" : "disabled"}?\nReply with 'yes'or 'no' in 15 seconds or 'no' will be selected.`;
+                        return x;
+                      },
+              cancelSetup: function(obj){ //value:"DevMessages"} 
+                  if (typeof(obj) !== "object") throw new Error(selfObjError(obj));
+                  let {y} = obj;
+                  return `\nNote, dev messages are still ${y.value ? "enabled" : "disabled"}`;
+              }
+          },
+          delCMD:{
+              askDel: function(obj){ //value:"DevMessages"} 
+                        if (typeof(obj) !== "object") throw new Error(selfObjError(obj));
+                        let {y} = obj;
+                        let x  = `By default, the option to delete bot commands is ${y.value ? "enabled" : "disabled"}. `;
+                            x += `Would you like set this to ${!y.value ? "enabled" : "disabled"}?\nReply with 'yes'or 'no' in 15 seconds or 'no' will be selected.`;
+                        return x;
+                      },
+              cancelSetup: function(obj){ //value:"DevMessages"} 
+                  if (typeof(obj) !== "object") throw new Error(selfObjError(obj));
+                  let {y} = obj;
+                  return `\n Note, deleting bot commands is still ${y.value ? "enabled" : "disabled"}`;
+              }
           }
       },
       error:{

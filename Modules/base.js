@@ -20,14 +20,14 @@ module.exports = {
        message.reply(lang.message.setup.checkChannel({gSet: guildSet}));
        
        const cccFilter = m => m.member.id === message.member.id
-                && (m.content.toLowerCase() === lang.message.setup.yesNo[0] || m.content.toLowerCase() === lang.message.setup.yesNo[1]
-                ||  m.content.toLowerCase() === lang.message.setup.yesNo[0].charAt(0) || m.content.toLowerCase() === lang.message.setup.yesNo[1].charAt(0));
+                && (m.content.toLowerCase() === lang.message.setup.yesNoCan[0] || m.content.toLowerCase() === lang.message.setup.yesNoCan[1]
+                ||  m.content.toLowerCase() === lang.message.setup.yesNoCan[0].charAt(0) || m.content.toLowerCase() === lang.message.setup.yesNoCan[1].charAt(0));
     
        const channelCheckCol = message.channel.createMessageCollector(cccFilter, { maxMatches: 1, time: 15000 });
        channelCheckCol.on('end', (c, r) => {
            let m = c.first();
            if (r === "matchesLimit" || r === "limit"){
-               if (m.content === lang.message.setup.yesNo[0] || m.content === lang.message.setup.yesNo[0].charAt(0)){
+               if (m.content === lang.message.setup.yesNoCan[0] || m.content === lang.message.setup.yesNoCan[0].charAt(0)){
                setup(client, db, m, message);
            } else {
                return message.channel.send(lang.message.setup.cancelSetup);
@@ -67,11 +67,20 @@ module.exports = {
 
 function setup(client, db, message, originalMessage){
     let { guildSet, lang, prefix, cmdList, cmdString, cmd, cmdArgs, modHandle, firstArg } = originalMessage.FireBot;
-    let yesNo  = lang.message.setup.yesNo;
-    const basicFilter = m => m.member.id === message.member.id;
-    const ynFilter = m => basicFilter(m)
-            && (m.content.toLowerCase() === yesNo[0] || m.content.toLowerCase() === yesNo[1]
-            ||  m.content.toLowerCase() === yesNo[0].charAt(0) || m.content.toLowerCase() === yesNo[1].charAt(0));
+    let glang = lang.message.setup;
+    lang = glang;
+    
+    let yesNoCan  = lang.yesNoCan; //Yes No Cancel Array
+    const basicFilter = m => m.member.id === message.member.id; //Basic message filter
+    const yFilter = m => m.content.toLowerCase() === yesNoCan[0] || m.content.toLowerCase() === yesNoCan[0].charAt(0); //Filter for yes or y
+    const nFilter = m => m.content.toLowerCase() === yesNoCan[1] || m.content.toLowerCase() === yesNoCan[1].charAt(0); //Filter for no or n
+    const cFilter = m => m.content.toLowerCase() === yesNoCan[2] || m.content.toLowerCase() === yesNoCan[2].charAt(0); //Filter for cancel or c
+    
+    const ynFilter = m => yFilter(m) || nFilter(m); //Filter for yes/y or no/n
+    const yncFilter = m => yFilter(m) || nFilter(m) || cFilter(m); //Filter for yes/y or no/n or cancel/c
+    
+    const ynBFilter = m => basicFilter(m) && ynFilter(m); //Apply the basic filter to ynFilter
+    const yncBFilter = m => basicFilter(m) && yncFilter(m); //Apply the basic filter to yncFilter
     
     let gSet = {
         prefix: guildSet.get("prefix"),
@@ -80,143 +89,161 @@ function setup(client, db, message, originalMessage){
         deleteCmd: guildSet.get("deleteCmd")
     };
     
+    //Fix Value $hit
+    
     //Now I know i could do this all with promises, but since i scrapped that part like 3 times, Im useing this. (If you can make it do the thing with out braking go ahead)
     new Promise((accept, reject) => {
-        message.channel.send(lang.message.setup.askPrefix({gSet:guildSet}));
-        const p1 = message.channel.createMessageCollector(ynFilter, {maxMatches:1, time:15000, errors:['time']});
+        message.channel.send(lang.prefix.askPrefix({gSet:guildSet}));
+        const p1 = message.channel.createMessageCollector(yncBFilter, {maxMatches:1, time:15000, errors:['time']});
         p1.on('end', (c, r) => {
             let m = c.first();
             if (r === "matchesLimit" || r === "limit"){
-                if (m.content !== yesNo[0] && m.content !== yesNo[0].charAt(0)){ return accept(m);}
+                if (cFilter(m)) return reject(m);
+                if (!yFilter(m)){ return accept(m);}
                 m.channel.send(`Enter new prefix.`);
                 const p2 = m.channel.createMessageCollector(basicFilter, {maxMatches:1, time:15000, errors:['time']});
                 p2.on('end', (c, r) =>{
                     m = c.first();
                     if (r === "matchesLimit" || r === "limit"){
                         let newPre = m.content.split(" ")[0];
-                        m.channel.send(lang.message.setup.conNewPrefix({newPre: newPre, gSet: gSet}));
-                        const p3 = m.channel.createMessageCollector(ynFilter, {maxMatches:1, time:15000, errors:['time']});
+                        m.channel.send(lang.prefix.conNewPrefix({newPre: newPre, gSet: gSet}));
+                        const p3 = m.channel.createMessageCollector(yncBFilter, {maxMatches:1, time:15000, errors:['time']});
                         p3.on('end', (c, r) => {
                            m = c.first();
                            if (r === "matchesLimit" || r === "limit"){
-                               if (m.content !== yesNo[0] && m.content !== yesNo[0].charAt(0)){ return accept(m);}
-                               m.channel.send(`New prefix set to ${newPre}`);
+                               if (m.content === "c") return reject(m);
+                               if (!yFilter(m)){ return accept(m);}
+                               m.channel.send(lang.prefix.setPre({value:newPre}));
                                gSet.prefix = newPre;
                                accept(m);
                            } else if (r === "time"){
-                                message.channel.send(lang.message.setup.noTime.slice(0, -1) + " of no.\nNote, no changes to the prefix have been made.");
+                                message.channel.send(lang.noTime.slice(0, -1) + lang.prefix.defno + lang.prefix.noChange);
                                 return accept(message);
                             } else {
-                                message.channel.send(`Whoa There! How you got here I don't know but you broke a thing. Were skipping this step.`);
+                                message.channel.send(lang.stepSkip);
                                 accept(message);
                             }
                         });
                     } else if (r === "time"){
-                        message.channel.send(lang.message.setup.noTime.slice(0, -22) + "\nNote, no changes to the prefix have been made.");
+                        message.channel.send(lang.noTime.slice(0, -22) + lang.prefix.noChange);
                         return accept(message);
                     } else {
-                        message.channel.send(`Whoa There! How you got here I don't know but you broke a thing. Were skipping this step.`);
+                        message.channel.send(lang.stepSkip);
                         accept(message);
                     }
                 });
             } else if (r === "time"){
-                message.channel.send(lang.message.setup.noTime.slice(0, -1) + " of no.\nNote, no changes to the prefix have been made.");
+                message.channel.send(lang.noTime.slice(0, -1) + lang.prefix.defno + lang.prefix.noChange);
                 return accept(message);
             } else {
-                message.channel.send(`Whoa There! How you got here I don't know but you broke a thing. Were skipping this step.`);
+                message.channel.send(lang.stepSkip);
                 accept(message);
             }
         });
     }) //Prefix Management Stuff
     .then(message => new Promise((accept, reject) =>{
-        message.channel.send(`The current language is set to ${getLangName({lang:client.FireBotVars.configFile.bot.default_lang[0], loc:client.FireBotVars.configFile.bot.default_lang[1]})}.`
-                            + `Would you like to change this?\nReply with 'yes' or 'no' in 15 seconds or 'no' will be selected.`);
-        const p1 = message.channel.createMessageCollector(ynFilter, {maxMatches:1, time:15000, errors:['time']});
+        message.channel.send(lang.lang.ask({value: getLangName({lang:client.FireBotVars.configFile.bot.default_lang[0], loc:client.FireBotVars.configFile.bot.default_lang[1]})}));
+        const p1 = message.channel.createMessageCollector(yncBFilter, {maxMatches:1, time:15000, errors:['time']});
         p1.on('end', (c, r) => {
             let m = c.first();
             if (r === "matchesLimit" || r === "limit"){
-                if (m.content !== yesNo[0] && m.content !== yesNo[0].charAt(0)){ return accept(m);}
-                m.channel.send(langList([lang.message.setup.lang.ask]));
+                if (cFilter(m)) return reject(m);
+                if (!yFilter(m)){ return accept(m);}
+                m.channel.send(langList([lang.lang.ask]));
                 const p2 = m.channel.createMessageCollector(basicFilter, {maxMatches:1, time:15000, errors:['time']});
                 p2.on('end', (c, r) =>{
                     m = c.first();
                     if (r === "matchesLimit" || r === "limit"){
-                        let num = m.content.split(" ")[0];
-                        if (isNaN(num)){m.channel.send(``)}
-                        m.channel.send(`Enter 'yes' to confirm ${langList(true, num, true)} or 'no' to cancel and use '#' as your prefix.\nYou have 15 seconds to enter otherwise no changes are made.`);
-                        const p3 = m.channel.createMessageCollector(ynFilter, {maxMatches:1, time:15000, errors:['time']});
+                        let num = parseInt(m.content.split(" ")[0]);
+                        if (isNaN(num)){
+                            m.channel.send(lang.lang.vNaN + lang.lang.noChange);
+                            accept(m);
+                        }
+                        let lLang = langList(true, num);
+                        if (lLang === false){
+                            m.channel.send(lang.lang.vNvL + lang.lang.noChange);
+                            accept(m);
+                        }
+                        m.channel.send(lang.lang.confLang({value: langList(true, num, true)}));
+                        const p3 = m.channel.createMessageCollector(yncBFilter, {maxMatches:1, time:15000, errors:['time']});
                         p3.on('end', (c, r) => {
                            m = c.first();
                            if (r === "matchesLimit" || r === "limit"){
-                               if (m.content !== yesNo[0] && m.content !== yesNo[0].charAt(0)){ return accept(m);}
-                               m.channel.send(`New prefix set to ${num}`);
-                               gSet.language = num;
+                               if (cFilter(m)) return reject(m);
+                               if (!yFilter(m)){ return accept(m);}
+                               m.channel.send(`Language set to ${langList(true, num, true)}`);
+                               gSet.language = lLang;
                                accept(m);
                            } else if (r === "time"){
-                                message.channel.send(lang.message.setup.noTime.slice(0, -1) + " of no.\nNote, no changes to the prefix have been made.");
+                                message.channel.send(lang.noTime.slice(0, -1) + lang.lang.defNo + lang.lang.noChange);
                                 return accept(message);
                             } else {
-                                message.channel.send(`Whoa There! How you got here I don't know but you broke a thing. Were skipping this step.`);
+                                message.channel.send(lang.stepSkip);
                                 accept(message);
                             }
                         });
                     } else if (r === "time"){
-                        message.channel.send(lang.message.setup.noTime.slice(0, -22) + "\nNote, no changes to the prefix have been made.");
+                        message.channel.send(lang.noTime.slice(0, -1) + lang.lang.defNo + lang.lang.noChange);
                         return accept(message);
                     } else {
-                        message.channel.send(`Whoa There! How you got here I don't know but you broke a thing. Were skipping this step.`);
+                       message.channel.send(lang.stepSkip);
                         accept(message);
                     }
                 });
             } else if (r === "time"){
-                message.channel.send(lang.message.setup.noTime.slice(0, -1) + " of no.\nNote, no changes to the prefix have been made.");
+                message.channel.send(lang.noTime.slice(0, -1) + lang.lang.defNo + lang.lang.noChange);
                 return accept(message);
             } else {
-                message.channel.send(`Whoa There! How you got here I don't know but you broke a thing. Were skipping this step.`);
+                message.channel.send(lang.stepSkip);
                 accept(message);
             }
         });
     })) //Language Management Stuff
     .then(message => new Promise((accept, reject) =>{
-        message.send(`By default, the option to recive messages is ${gSet.devMessage ? "enabled" : "disabled"}.`
-                    +`Would you like set this to ${!gSet.devMessage ? "enabled" : "disabled"}?\nReply with 'yes'or 'no' in 15 seconds or 'no' will be selected.`);
-        const p1 = message.channel.createMessageCollector(ynFilter, {maxMatches:1, time:15000, errors:['time']});
+        message.channel.send(lang.devMess.askDev({value:gSet.devMessage}));
+        const p1 = message.channel.createMessageCollector(yncBFilter, {maxMatches:1, time:15000, errors:['time']});
         p1.on('end', (c, r) => {
             let m = c.first();
             if (r === "matchesLimit" || r === "limit"){
-                if (m.content !== yesNo[0] && m.content !== yesNo[0].charAt(0)){ return accept(m);}
+                if (cFilter(m)) return reject(m);
+                if (!yFilter(m)){ return accept(m);}
                 gSet.devMessage = !gSet.devMessage;
                 return accept(m);
             } else if (r === "time"){
-                message.channel.send(lang.message.setup.noTime.slice(0, -22) + `\nNote, dev messages are still ${gSet.devMessage ? "enabled" : "disabled"}`);
+                message.channel.send(lang.noTime.slice(0, -22) + lang.devMess.cancelSetup({value: gSet.devMessage}));
                 return accept(message);
             } else {
-                message.channel.send(`Whoa There! How you got here I don't know but you broke a thing. Were skipping this step.`);
+                message.channel.send(lang.stepSkip);
                 accept(message);
             }
         });
     }))//Dev Message Stuff
     .then(message => new Promise((accept, reject) =>{
-        message.channel.send(`By default, the option to delete bot commands is ${gSet.deleteCmd ? "enabled" : "disabled"}.`
-                    +`Would you like set this to ${!gSet.deleteCmd ? "enabled" : "disabled"}?\nReply with 'yes'or 'no' in 15 seconds or 'no' will be selected.`);
-        const p1 = message.channel.createMessageCollector(ynFilter, {maxMatches:1, time:15000, errors:['time']});
+        message.channel.send(lang.delCMD.askDel({value: gSet.deleteCmd}));
+        const p1 = message.channel.createMessageCollector(yncBFilter, {maxMatches:1, time:15000, errors:['time']});
         p1.on('end', (c, r) => {
             let m = c.first();
             if (r === "matchesLimit" || r === "limit"){
-                if (m.content !== yesNo[0] && m.content !== yesNo[0].charAt(0)){ return accept(m);}
-                gSet.devMessage = !gSet.devMessage;
+                if (cFilter(m)) return reject(m);
+                if (!yFilter(m)){ return accept(m);}
+                gSet.deleteCmd = !gSet.deleteCmd;
                 return accept(m);
             } else if (r === "time"){
-                message.channel.send(lang.message.setup.noTime.slice(0, -22) + `\nNote, deleting bot commands are still ${gSet.deleteCmd ? "enabled" : "disabled"}`);
+                message.channel.send(lang.message.setup.noTime.slice(0, -22) + lang.delCMD.cancelSetup({value: gSet.deleteCmd}));
                 return accept(message);
             } else {
-                message.channel.send(`Whoa There! How you got here I don't know but you broke a thing. Were skipping this step.`);
+                message.channel.send(lang.stepSkip);
                 accept(message);
             }
         });
     }))//Del CMD Stuff
-    .then(message => {console.log(gSet);})
-    ;
+    .then(message => new Promise((accept, reject) => {
+        
+    }))//Write DB Stuff
+    .catch(console.log)
+    .catch(message => {
+        message.channel.send(lang.message.setup.cancelSetup);
+    });//Cancel Setup
 }
 
 function langList(makeLangSetting, num, other){
